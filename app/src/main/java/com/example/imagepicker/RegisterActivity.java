@@ -214,10 +214,12 @@ public class RegisterActivity extends AppCompatActivity {
                                             p1.setStyle(Paint.Style.STROKE);
                                             p1.setStrokeWidth(5);
 
+                                            performFaceRecognition(bounds, input);
+
                                             canvas.drawRect(bounds, p1);
                                         }
 
-                                        imageView.setImageBitmap(mutableBmp);
+                                        //imageView.setImageBitmap(mutableBmp);
                                     }
                                 })
                         .addOnFailureListener(
@@ -230,6 +232,27 @@ public class RegisterActivity extends AppCompatActivity {
                                 });
     }
 
+    public void performFaceRecognition(Rect bounds, Bitmap input) {
+        if (bounds.top < 0) {
+            bounds.top = 0;
+        }
+
+        if (bounds.left < 0) {
+            bounds.left = 0;
+        }
+
+        if (bounds.right > input.getWidth()) {
+            bounds.right = input.getWidth();
+        }
+
+        if (bounds.bottom > input.getHeight()) {
+            bounds.bottom = input.getHeight();
+        }
+
+        Bitmap croppedFace = Bitmap.createBitmap(input, bounds.left, bounds.top, bounds.width(), bounds.height());
+
+        imageView.setImageBitmap(croppedFace);
+    }
 
     @Override
     protected void onDestroy() {

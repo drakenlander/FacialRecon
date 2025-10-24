@@ -4,9 +4,7 @@ plugins {
 
 android {
     namespace = "com.example.imagepicker"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.imagepicker"
@@ -31,6 +29,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    androidResources {
+        noCompress += "tflite"
+    }
 }
 
 dependencies {
@@ -43,5 +45,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
+    implementation("org.tensorflow:tensorflow-lite:+")
     implementation("com.google.mlkit:face-detection:16.1.7")
 }
