@@ -18,7 +18,12 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,14 +32,37 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceContour;
+import com.google.mlkit.vision.face.FaceDetection;
+import com.google.mlkit.vision.face.FaceDetector;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
+import com.google.mlkit.vision.face.FaceLandmark;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.List;
 
 public class RegisterActivity extends AppCompatActivity {
     public static final int PERMISSION_CODE = 100;
     ImageView imageView;
     CardView galleryCard,cameraCard;
     Uri image_uri;
+
+    // High-accuracy landmark detection and face classification
+    FaceDetectorOptions highAccuracyOpts =
+            new FaceDetectorOptions.Builder()
+                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
+                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+                    .build();
+
+    FaceDetector detector;
 
     ActivityResultLauncher<Intent> galleryActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -46,6 +74,8 @@ public class RegisterActivity extends AppCompatActivity {
                         Bitmap inputImage = uriToBitmap(image_uri);
                         Bitmap rotated = rotateBitmap(inputImage);
                         imageView.setImageBitmap(rotated);
+
+                        performFaceDetection(rotated);
                     }
                 }
             });
@@ -59,6 +89,8 @@ public class RegisterActivity extends AppCompatActivity {
                         Bitmap inputImage = uriToBitmap(image_uri);
                         Bitmap rotated = rotateBitmap(inputImage);
                         imageView.setImageBitmap(rotated);
+
+                        performFaceDetection(rotated);
                     }
                 }
             });
@@ -117,6 +149,8 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
+
+        detector = FaceDetection.getClient(highAccuracyOpts);
     }
 
     private void openCamera() {
@@ -158,6 +192,44 @@ public class RegisterActivity extends AppCompatActivity {
         Bitmap cropped = Bitmap.createBitmap(input,0,0, input.getWidth(), input.getHeight(), rotationMatrix, true);
         return cropped;
     }
+
+    public void performFaceDetection(Bitmap input) {
+        Bitmap mutableBmp = input.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(mutableBmp);
+        InputImage image = InputImage.fromBitmap(input, 0);
+
+        Task<List<Face>> result =
+                detector.process(image)
+                        .addOnSuccessListener(
+                                new OnSuccessListener<List<Face>>() {
+                                    @Override
+                                    public void onSuccess(List<Face> faces) {
+                                        Log.d("tryFace", "Len = " + faces.size());
+
+                                        for (Face face : faces) {
+                                            Rect bounds = face.getBoundingBox();
+
+                                            Paint p1 = new Paint();
+                                            p1.setColor(Color.RED);
+                                            p1.setStyle(Paint.Style.STROKE);
+                                            p1.setStrokeWidth(5);
+
+                                            canvas.drawRect(bounds, p1);
+                                        }
+
+                                        imageView.setImageBitmap(mutableBmp);
+                                    }
+                                })
+                        .addOnFailureListener(
+                                new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        // Task failed with an exception
+                                        // ...
+                                    }
+                                });
+    }
+
 
     @Override
     protected void onDestroy() {
