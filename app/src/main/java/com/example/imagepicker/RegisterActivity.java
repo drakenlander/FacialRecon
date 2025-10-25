@@ -1,35 +1,21 @@
 package com.example.imagepicker;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -38,73 +24,54 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+
 import com.example.imagepicker.face_recognition.FaceClassifier;
 import com.example.imagepicker.face_recognition.TFLiteFaceRecognition;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
-import com.google.mlkit.vision.face.FaceContour;
 import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
-import com.google.mlkit.vision.face.FaceLandmark;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 public class RegisterActivity extends AppCompatActivity {
-    public static final int PERMISSION_CODE = 100;
+
     private static final String KEY_IMAGE_URI = "image_uri";
-    ImageView imageView;
-    CardView galleryCard,cameraCard;
-    Uri image_uri;
+    private ImageView imageView;
+    private CardView galleryCard, cameraCard;
+    private Uri image_uri;
+    private FaceDetector detector;
+    private FaceClassifier faceClassifier;
 
-    // High-accuracy landmark detection and face classification
-    FaceDetectorOptions highAccuracyOpts =
-            new FaceDetectorOptions.Builder()
-                    .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
-                    .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
-                    .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
-                    .build();
-
-    FaceDetector detector;
-    FaceClassifier faceClassifier;
-
-    ActivityResultLauncher<Intent> galleryActivityResultLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> galleryActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        image_uri = result.getData().getData();
-                        Bitmap bitmap = getBitmapFromUri(image_uri);
-                        if (bitmap != null) {
-                            imageView.setImageBitmap(bitmap);
-                            performFaceDetection(bitmap);
-                        }
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    image_uri = result.getData().getData();
+                    Bitmap bitmap = getBitmapFromUri(image_uri);
+                    if (bitmap != null) {
+                        imageView.setImageBitmap(bitmap);
+                        performFaceDetection(bitmap);
                     }
                 }
             });
 
-    ActivityResultLauncher<Intent> cameraActivityResultLauncher = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> cameraActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        if (image_uri != null) {
-                            Bitmap bitmap = getBitmapFromUri(image_uri);
-                            if (bitmap != null) {
-                                imageView.setImageBitmap(bitmap);
-                                performFaceDetection(bitmap);
-                            }
-                        } else {
-                            Toast.makeText(RegisterActivity.this, "Error: Image URI is missing.", Toast.LENGTH_SHORT).show();
-                        }
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Bitmap bitmap = getBitmapFromUri(image_uri);
+                    if (bitmap != null) {
+                        imageView.setImageBitmap(bitmap);
+                        performFaceDetection(bitmap);
                     }
                 }
             });
@@ -125,48 +92,30 @@ public class RegisterActivity extends AppCompatActivity {
         galleryCard = findViewById(R.id.gallerycard);
         cameraCard = findViewById(R.id.cameracard);
 
-        galleryCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                galleryActivityResultLauncher.launch(galleryIntent);
-            }
+        galleryCard.setOnClickListener(v -> {
+            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            galleryActivityResultLauncher.launch(galleryIntent);
         });
 
-        cameraCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    String[] permissionsToRequest;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        permissionsToRequest = new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES};
-                    } else {
-                        permissionsToRequest = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-                    }
-
-                    boolean allPermissionsGranted = true;
-                    for (String permission : permissionsToRequest) {
-                        if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                            allPermissionsGranted = false;
-                            break;
-                        }
-                    }
-
-                    if (allPermissionsGranted) {
-                        openCamera();
-                    } else {
-                        requestPermissions(permissionsToRequest, 112);
-                    }
+        cameraCard.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, 112);
                 } else {
                     openCamera();
                 }
+            } else {
+                openCamera();
             }
         });
 
+        FaceDetectorOptions highAccuracyOpts = new FaceDetectorOptions.Builder()
+                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+                .build();
         detector = FaceDetection.getClient(highAccuracyOpts);
 
         try {
-            faceClassifier = TFLiteFaceRecognition.create(getAssets(), "mobile_face_net.tflite", 112, false, getApplicationContext());
+            faceClassifier = TFLiteFaceRecognition.create(getAssets(), "mobile_face_net.tflite", 112, false, this);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -191,89 +140,12 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private Bitmap getBitmapFromUri(Uri uri) {
-        if (uri == null) {
-            Toast.makeText(this, "Error processing image: uri is null", Toast.LENGTH_LONG).show();
-            return null;
-        }
-        try {
-            // First, decode with inJustDecodeBounds=true to check dimensions
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            InputStream imageStream = getContentResolver().openInputStream(uri);
-            BitmapFactory.decodeStream(imageStream, null, options);
-            if (imageStream != null) {
-                imageStream.close();
-            }
-
-            // Calculate inSampleSize
-            options.inSampleSize = calculateInSampleSize(options, 1024, 1024);
-
-            // Decode bitmap with inSampleSize set
-            options.inJustDecodeBounds = false;
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            Bitmap image = BitmapFactory.decodeStream(inputStream, null, options);
-            if (inputStream != null) {
-                inputStream.close();
-            }
-
-            if (image == null) {
-                return null;
-            }
-
-            // Handle rotation
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                InputStream exifInputStream = getContentResolver().openInputStream(uri);
-                if (exifInputStream != null) {
-                    ExifInterface exifInterface = new ExifInterface(exifInputStream);
-                    int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                    exifInputStream.close();
-
-                    Matrix matrix = new Matrix();
-                    switch (orientation) {
-                        case ExifInterface.ORIENTATION_ROTATE_90:
-                            matrix.setRotate(90);
-                            break;
-                        case ExifInterface.ORIENTATION_ROTATE_180:
-                            matrix.setRotate(180);
-                            break;
-                        case ExifInterface.ORIENTATION_ROTATE_270:
-                            matrix.setRotate(270);
-                            break;
-                        default:
-                            // No rotation needed
-                            return image;
-                    }
-                    return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
-                }
-            }
-            return image;
-        } catch (Throwable e) {
+        try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
+            return BitmapFactory.decodeStream(inputStream);
+        } catch (IOException e) {
             e.printStackTrace();
-            final String message = e.getMessage();
-            runOnUiThread(() -> Toast.makeText(this, "Error processing image: " + message, Toast.LENGTH_LONG).show());
-            Log.e("ImageProcessingError", "Error in getBitmapFromUri", e);
             return null;
         }
-    }
-
-    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
     }
 
     public void performFaceDetection(Bitmap input) {
@@ -281,83 +153,33 @@ public class RegisterActivity extends AppCompatActivity {
         Canvas canvas = new Canvas(mutableBmp);
         InputImage image = InputImage.fromBitmap(input, 0);
 
-        Task<List<Face>> result =
-                detector.process(image)
-                        .addOnSuccessListener(
-                                new OnSuccessListener<List<Face>>() {
-                                    @Override
-                                    public void onSuccess(List<Face> faces) {
-                                        Log.d("tryFace", "Len = " + faces.size());
-
-                                        if (!faces.isEmpty()) {
-                                            Face firstFace = faces.get(0);
-                                            Rect bounds = firstFace.getBoundingBox();
-
-                                            Paint p1 = new Paint();
-                                            p1.setColor(Color.RED);
-                                            p1.setStyle(Paint.Style.STROKE);
-                                            p1.setStrokeWidth(5);
-
-                                            performFaceRecognition(bounds, input);
-
-                                            canvas.drawRect(bounds, p1);
-                                        }
-
-                                        imageView.setImageBitmap(mutableBmp);
-                                    }
-                                })
-                        .addOnFailureListener(
-                                new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        // Task failed with an exception
-                                        // ...
-                                    }
-                                });
+        detector.process(image)
+                .addOnSuccessListener(faces -> {
+                    if (!faces.isEmpty()) {
+                        performFaceRecognition(faces.get(0).getBoundingBox(), input);
+                        Paint p1 = new Paint();
+                        p1.setColor(Color.RED);
+                        p1.setStyle(Paint.Style.STROKE);
+                        p1.setStrokeWidth(5);
+                        canvas.drawRect(faces.get(0).getBoundingBox(), p1);
+                    }
+                    imageView.setImageBitmap(mutableBmp);
+                })
+                .addOnFailureListener(e -> Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     public void performFaceRecognition(Rect bounds, Bitmap input) {
-        try {
-            if (bounds.top < 0) {
-                bounds.top = 0;
-            }
+        if (bounds.left < 0) bounds.left = 0;
+        if (bounds.top < 0) bounds.top = 0;
+        if (bounds.right > input.getWidth()) bounds.right = input.getWidth() - 1;
+        if (bounds.bottom > input.getHeight()) bounds.bottom = input.getHeight() - 1;
 
-            if (bounds.left < 0) {
-                bounds.left = 0;
-            }
+        Bitmap croppedFace = Bitmap.createBitmap(input, bounds.left, bounds.top, bounds.width(), bounds.height());
+        croppedFace = Bitmap.createScaledBitmap(croppedFace, 112, 112, false);
 
-            if (bounds.right > input.getWidth()) {
-                bounds.right = input.getWidth();
-            }
-
-            if (bounds.bottom > input.getHeight()) {
-                bounds.bottom = input.getHeight();
-            }
-
-            if (bounds.width() <= 0 || bounds.height() <= 0) {
-                return;
-            }
-
-            Bitmap croppedFace = Bitmap.createBitmap(input, bounds.left, bounds.top, bounds.width(), bounds.height());
-
-            croppedFace = Bitmap.createScaledBitmap(croppedFace, 112, 112, false);
-
-            FaceClassifier.Recognition recognition = faceClassifier.recognizeImage(croppedFace,true);
-
-            final Bitmap finalCroppedFace = croppedFace;
-            runOnUiThread(() -> {
-                if (recognition != null) {
-                    showRegisterDialogue(finalCroppedFace, recognition);
-                } else {
-                    Toast.makeText(this, "Could not generate face embedding.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (Throwable e) {
-            e.printStackTrace();
-            final String message = e.getMessage();
-            runOnUiThread(() -> Toast.makeText(this, "Error during face recognition: " + message, Toast.LENGTH_LONG).show());
-            Log.e("FaceRecognitionError", "Error in performFaceRecognition", e);
-        }
+        // Get the face embedding
+        FaceClassifier.Recognition recognition = faceClassifier.recognizeImage(croppedFace, true);
+        showRegisterDialogue(croppedFace, recognition);
     }
 
     public void showRegisterDialogue(Bitmap face, FaceClassifier.Recognition recognition) {
@@ -370,17 +192,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         imageView1.setImageBitmap(face);
 
-        register.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String name = editText.getText().toString().trim();
-                if (name.isEmpty()) {
-                    editText.setError("Enter Name");
-                } else {
-                    faceClassifier.register(name, recognition);
-                    Toast.makeText(RegisterActivity.this, "Registered " + name, Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
-                }
+        register.setOnClickListener(view -> {
+            String name = editText.getText().toString().trim();
+            if (name.isEmpty()) {
+                editText.setError("Enter Name");
+            } else {
+                faceClassifier.register(name, recognition);
+                Toast.makeText(RegisterActivity.this, "Registered " + name, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
             }
         });
 

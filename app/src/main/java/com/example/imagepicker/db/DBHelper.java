@@ -1,7 +1,10 @@
 package com.example.imagepicker.db;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
@@ -17,6 +20,8 @@ import com.example.imagepicker.face_recognition.FaceClassifier;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "MyFaces.db";
+    private static final int DATABASE_VERSION = 3;
+
     public static final String FACE_TABLE_NAME = "faces";
     public static final String FACE_COLUMN_ID = "id";
     public static final String FACE_COLUMN_NAME = "name";
@@ -27,42 +32,60 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USERS_COLUMN_USERNAME = "username";
     public static final String USERS_COLUMN_PASSWORD = "password";
 
+    public static final String ATTEMPTS_TABLE_NAME = "attempts";
+    public static final String ATTEMPTS_COLUMN_ID = "id";
+    public static final String ATTEMPTS_COLUMN_PERSON_ID = "person_id";
+    public static final String ATTEMPTS_COLUMN_PERSON_NAME = "person_name";
+    public static final String ATTEMPTS_COLUMN_TIMESTAMP = "timestamp";
 
 
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, 2);
+        super(context, DATABASE_NAME , null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
-                "create table faces " +
-                        "(id integer primary key, name text,embedding text)"
+                "CREATE TABLE " + FACE_TABLE_NAME + " (" +
+                        FACE_COLUMN_ID + " INTEGER PRIMARY KEY, " +
+                        FACE_COLUMN_NAME + " TEXT, " +
+                        FACE_COLUMN_EMBEDDING + " TEXT)"
         );
         db.execSQL(
-                "create table users " +
-                        "(id integer primary key, username text, password text)"
+                "CREATE TABLE " + USERS_TABLE_NAME + " (" +
+                        USERS_COLUMN_ID + " INTEGER PRIMARY KEY, " +
+                        USERS_COLUMN_USERNAME + " TEXT, " +
+                        USERS_COLUMN_PASSWORD + " TEXT)"
+        );
+        db.execSQL(
+                "CREATE TABLE " + ATTEMPTS_TABLE_NAME + " (" +
+                        ATTEMPTS_COLUMN_ID + " INTEGER PRIMARY KEY, " +
+                        ATTEMPTS_COLUMN_PERSON_ID + " INTEGER, " +
+                        ATTEMPTS_COLUMN_PERSON_NAME + " TEXT, " +
+                        ATTEMPTS_COLUMN_TIMESTAMP + " TEXT, " +
+                        "FOREIGN KEY(" + ATTEMPTS_COLUMN_PERSON_ID + ") REFERENCES " + FACE_TABLE_NAME + "(" + FACE_COLUMN_ID + "))"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS faces");
-        db.execSQL("DROP TABLE IF EXISTS users");
+        db.execSQL("DROP TABLE IF EXISTS " + FACE_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ATTEMPTS_TABLE_NAME);
         onCreate(db);
     }
 
     public boolean insertFace (String name, Object embedding) {
         float[][] floatList = (float[][]) embedding;
-        String embeddingString = "";
+        StringBuilder embeddingString = new StringBuilder();
         for(Float f: floatList[0]){
-            embeddingString += f.toString()+",";
+            embeddingString.append(f.toString()).append(",");
         }
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(FACE_COLUMN_NAME, name);
-        contentValues.put(FACE_COLUMN_EMBEDDING, embeddingString);
-        db.insert("faces", null, contentValues);
+        contentValues.put(FACE_COLUMN_EMBEDDING, embeddingString.toString());
+        db.insert(FACE_TABLE_NAME, null, contentValues);
         return true;
     }
 
@@ -75,6 +98,19 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
+    public void insertAttempt(Integer personId, String personName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+
+        if (personId != null) {
+            contentValues.put(ATTEMPTS_COLUMN_PERSON_ID, personId);
+        }
+        contentValues.put(ATTEMPTS_COLUMN_PERSON_NAME, personName);
+        contentValues.put(ATTEMPTS_COLUMN_TIMESTAMP, timestamp);
+        db.insert(ATTEMPTS_TABLE_NAME, null, contentValues);
+    }
+
     public boolean checkUser(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from users where username = ? and password = ?", new String[]{username, password});
@@ -83,66 +119,34 @@ public class DBHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    public Cursor getData(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from faces where id="+id+"", null );
-        return res;
-    }
-
-    public int numberOfRows(){
-        SQLiteDatabase db = this.getReadableDatabase();
-        int numRows = (int) DatabaseUtils.queryNumEntries(db, FACE_TABLE_NAME);
-        return numRows;
-    }
-
-    public boolean updateFace (Integer id, String name, String embedding) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(FACE_COLUMN_NAME, name);
-        contentValues.put(FACE_COLUMN_EMBEDDING, embedding);
-        db.update(FACE_TABLE_NAME, contentValues, "id = ? ", new String[] { Integer.toString(id) } );
-        return true;
-    }
-
-    public Integer deleteFace (Integer id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(FACE_TABLE_NAME,
-                "id = ? ",
-                new String[] { Integer.toString(id) });
-    }
-
     @SuppressLint("Range")
     public HashMap<String, FaceClassifier.Recognition> getAllFaces() {
-        //hp = new HashMap();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from faces", null );
+        Cursor res =  db.rawQuery( "select * from " + FACE_TABLE_NAME, null );
         res.moveToFirst();
 
         HashMap<String, FaceClassifier.Recognition> registered = new HashMap<>();
-        while(res.isAfterLast() == false){
+        while(!res.isAfterLast()){
+            String id = res.getString(res.getColumnIndex(FACE_COLUMN_ID));
+            String name = res.getString(res.getColumnIndex(FACE_COLUMN_NAME));
             String embeddingString = res.getString(res.getColumnIndex(FACE_COLUMN_EMBEDDING));
             String[] stringList = embeddingString.split(",");
             if (stringList.length == 0) {
                 res.moveToNext();
                 continue;
             }
-            ArrayList<Float> embeddingFloat = new ArrayList<>();
-            for (String s : stringList) {
-                if(!s.isEmpty()) {
-                    embeddingFloat.add(Float.parseFloat(s));
+            float[][] embeedings = new float[1][stringList.length];
+            for (int i = 0; i < stringList.length; i++) {
+                if(!stringList[i].isEmpty()) {
+                    embeedings[0][i] = Float.parseFloat(stringList[i]);
                 }
             }
-            float[][] bigArray = new float[1][embeddingFloat.size()];
-            float[] floatArray = new float[embeddingFloat.size()];
-            for (int i = 0; i < embeddingFloat.size(); i++) {
-                floatArray[i] = embeddingFloat.get(i);
-            }
-            bigArray[0] = floatArray;
-            FaceClassifier.Recognition recognition = new FaceClassifier.Recognition(res.getString(res.getColumnIndex(FACE_COLUMN_NAME)),bigArray);
-            registered.putIfAbsent(recognition.getTitle(),recognition);
+
+            FaceClassifier.Recognition recognition = new FaceClassifier.Recognition(id, name, -1f, null);
+            recognition.setEmbeeding(embeedings);
+            registered.put(name, recognition);
             res.moveToNext();
         }
-        Log.d("tryRL","rl="+registered.size());
         return registered;
     }
 }
