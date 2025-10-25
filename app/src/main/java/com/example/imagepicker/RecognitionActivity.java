@@ -23,7 +23,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -76,10 +76,13 @@ public class RecognitionActivity extends AppCompatActivity {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
+                        assert result.getData() != null;
                         image_uri = result.getData().getData();
                         Bitmap bitmap = getBitmapFromUri(image_uri);
+
                         if (bitmap != null) {
                             imageView.setImageBitmap(bitmap);
+
                             performFaceDetection(bitmap);
                         }
                     }
@@ -94,8 +97,10 @@ public class RecognitionActivity extends AppCompatActivity {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         if (image_uri != null) {
                             Bitmap bitmap = getBitmapFromUri(image_uri);
+
                             if (bitmap != null) {
                                 imageView.setImageBitmap(bitmap);
+
                                 performFaceDetection(bitmap);
                             }
                         } else {
@@ -132,29 +137,25 @@ public class RecognitionActivity extends AppCompatActivity {
         cameraCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    String[] permissionsToRequest;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        permissionsToRequest = new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES};
-                    } else {
-                        permissionsToRequest = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-                    }
-
-                    boolean allPermissionsGranted = true;
-                    for (String permission : permissionsToRequest) {
-                        if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                            allPermissionsGranted = false;
-                            break;
-                        }
-                    }
-
-                    if (allPermissionsGranted) {
-                        openCamera();
-                    } else {
-                        requestPermissions(permissionsToRequest, 112);
-                    }
+                String[] permissionsToRequest;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    permissionsToRequest = new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES};
                 } else {
+                    permissionsToRequest = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                }
+
+                boolean allPermissionsGranted = true;
+                for (String permission : permissionsToRequest) {
+                    if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                        allPermissionsGranted = false;
+                        break;
+                    }
+                }
+
+                if (allPermissionsGranted) {
                     openCamera();
+                } else {
+                    requestPermissions(permissionsToRequest, 112);
                 }
             }
         });
@@ -217,30 +218,28 @@ public class RecognitionActivity extends AppCompatActivity {
             }
 
             // Handle rotation
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                InputStream exifInputStream = getContentResolver().openInputStream(uri);
-                if (exifInputStream != null) {
-                    ExifInterface exifInterface = new ExifInterface(exifInputStream);
-                    int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-                    exifInputStream.close();
+            InputStream exifInputStream = getContentResolver().openInputStream(uri);
+            if (exifInputStream != null) {
+                ExifInterface exifInterface = new ExifInterface(exifInputStream);
+                int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                exifInputStream.close();
 
-                    Matrix matrix = new Matrix();
-                    switch (orientation) {
-                        case ExifInterface.ORIENTATION_ROTATE_90:
-                            matrix.setRotate(90);
-                            break;
-                        case ExifInterface.ORIENTATION_ROTATE_180:
-                            matrix.setRotate(180);
-                            break;
-                        case ExifInterface.ORIENTATION_ROTATE_270:
-                            matrix.setRotate(270);
-                            break;
-                        default:
-                            // No rotation needed
-                            return image;
-                    }
-                    return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
+                Matrix matrix = new Matrix();
+                switch (orientation) {
+                    case ExifInterface.ORIENTATION_ROTATE_90:
+                        matrix.setRotate(90);
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        matrix.setRotate(180);
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        matrix.setRotate(270);
+                        break;
+                    default:
+                        // No rotation needed
+                        return image;
                 }
+                return Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
             }
             return image;
         } catch (Throwable e) {
@@ -348,7 +347,7 @@ public class RecognitionActivity extends AppCompatActivity {
 
             Log.d("tryFR", recognition.getTitle() + " " + recognition.getDistance());
 
-            if (recognition != null && recognition.getTitle() != null && recognition.getDistance() < 1) {
+            if (recognition.getTitle() != null && recognition.getDistance() < 1) {
                 Paint p1 = new Paint();
                 p1.setColor(Color.WHITE);
                 p1.setTextSize(60);

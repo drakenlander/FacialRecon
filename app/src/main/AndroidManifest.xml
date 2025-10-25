@@ -42,6 +42,21 @@
             android:configChanges="orientation|screenSize"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".SignUpActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".SignInActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".MainMenuActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>
