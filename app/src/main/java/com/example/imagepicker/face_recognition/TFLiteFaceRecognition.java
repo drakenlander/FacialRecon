@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.util.Pair;
 
-
 import com.example.imagepicker.MainActivity;
 
 import org.tensorflow.lite.Interpreter;
@@ -22,9 +21,8 @@ import java.util.Map;
 
 public class TFLiteFaceRecognition
         implements FaceClassifier {
-
     //private static final int OUTPUT_SIZE = 512;
-    private static final int OUTPUT_SIZE = 512;
+    private static final int OUTPUT_SIZE = 192;
 
     // Only return this many results.
     private static final int NUM_DETECTIONS = 1;
@@ -32,24 +30,17 @@ public class TFLiteFaceRecognition
     // Float model
     private static final float IMAGE_MEAN = 128.0f;
     private static final float IMAGE_STD = 128.0f;
-
     private boolean isModelQuantized;
+
     // Config values.
     private int inputSize;
-
     private int[] intValues;
-
-    private float[][] embeedings;
-
+    private float[][] embeddings;
     private ByteBuffer imgData;
-
     private Interpreter tfLite;
 
-    public HashMap<String, Recognition> registered = new HashMap<>();
-
-    public void register(String name, Recognition rec) {
-        registered.put(name, rec);
-    }
+    //public HashMap<String, Recognition> registered = new HashMap<>();
+    public void register(String name, Recognition rec) { MainActivity.registered.put(name, rec); }
 
     private TFLiteFaceRecognition() {}
 
@@ -61,10 +52,9 @@ public class TFLiteFaceRecognition
         FileChannel fileChannel = inputStream.getChannel();
         long startOffset = fileDescriptor.getStartOffset();
         long declaredLength = fileDescriptor.getDeclaredLength();
+
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
-
-
 
     public static FaceClassifier create(
             final AssetManager assetManager,
@@ -83,40 +73,46 @@ public class TFLiteFaceRecognition
         }
 
         d.isModelQuantized = isQuantized;
-        // Pre-allocate buffers.
+
+        //Pre-allocate buffers.
         int numBytesPerChannel;
+
         if (isQuantized) {
-            numBytesPerChannel = 1; // Quantized
+            numBytesPerChannel = 1; //Quantized
         } else {
-            numBytesPerChannel = 4; // Floating point
+            numBytesPerChannel = 4; //Floating point
         }
+
         d.imgData = ByteBuffer.allocateDirect(1 * d.inputSize * d.inputSize * 3 * numBytesPerChannel);
         d.imgData.order(ByteOrder.nativeOrder());
         d.intValues = new int[d.inputSize * d.inputSize];
+
         return d;
     }
 
-    //TODO  looks for the nearest embeeding in the dataset
-    // and retrurns the pair <id, distance>
+    //TODO  looks for the nearest embedding in the dataset and returns the pair <id, distance>
     private Pair<String, Float> findNearest(float[] emb) {
         Pair<String, Float> ret = null;
-        for (Map.Entry<String, Recognition> entry : registered.entrySet()) {
+        for (Map.Entry<String, Recognition> entry : MainActivity.registered.entrySet()) {
             final String name = entry.getKey();
             final float[] knownEmb = ((float[][]) entry.getValue().getEmbeeding())[0];
 
             float distance = 0;
+
             for (int i = 0; i < emb.length; i++) {
                 float diff = emb[i] - knownEmb[i];
                 distance += diff*diff;
             }
+
             distance = (float) Math.sqrt(distance);
+
             if (ret == null || distance < ret.second) {
                 ret = new Pair<>(name, distance);
             }
         }
+
         return ret;
     }
-
 
     //TODO TAKE INPUT IMAGE AND RETURN RECOGNITIONS
     @Override
@@ -126,55 +122,55 @@ public class TFLiteFaceRecognition
         for (int i = 0; i < inputSize; ++i) {
             for (int j = 0; j < inputSize; ++j) {
                 int pixelValue = intValues[i * inputSize + j];
-                if (isModelQuantized) {
-                    // Quantized model
+
+                if (isModelQuantized) { //Quantized model
                     imgData.put((byte) ((pixelValue >> 16) & 0xFF));
                     imgData.put((byte) ((pixelValue >> 8) & 0xFF));
                     imgData.put((byte) (pixelValue & 0xFF));
-                } else { // Float model
+                } else { //Float model
                     imgData.putFloat((((pixelValue >> 16) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
                     imgData.putFloat((((pixelValue >> 8) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
                     imgData.putFloat(((pixelValue & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
                 }
             }
         }
-        Object[] inputArray = {imgData};
+
+        Object[] inputArray = { imgData };
+
         // Here outputMap is changed to fit the Face Mask detector
         Map<Integer, Object> outputMap = new HashMap<>();
 
-        embeedings = new float[1][OUTPUT_SIZE];
-        outputMap.put(0, embeedings);
+        embeddings = new float[1][OUTPUT_SIZE];
+        outputMap.put(0, embeddings);
 
-        // Run the inference call.
+        // Run the inference call
         tfLite.runForMultipleInputsOutputs(inputArray, outputMap);
-
 
         float distance = Float.MAX_VALUE;
         String id = "0";
         String label = "?";
 
-        if (registered.size() > 0) {
-            final Pair<String, Float> nearest = findNearest(embeedings[0]);
+        if (MainActivity.registered.size() > 0) {
+            final Pair<String, Float> nearest = findNearest(embeddings[0]);
             if (nearest != null) {
                 final String name = nearest.first;
                 label = name;
                 distance = nearest.second;
             }
         }
+
         final int numDetectionsOutput = 1;
+
         Recognition rec = new Recognition(
                 id,
                 label,
                 distance,
                 new RectF());
 
-
         if (storeExtra) {
-            rec.setEmbeeding(embeedings);
+            rec.setEmbeeding(embeddings);
         }
 
         return rec;
     }
-
-
 }
