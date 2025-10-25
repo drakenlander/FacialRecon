@@ -162,7 +162,7 @@ public class RecognitionActivity extends AppCompatActivity {
         detector = FaceDetection.getClient(highAccuracyOpts);
 
         try {
-            faceClassifier = TFLiteFaceRecognition.create(getAssets(), "mobile_face_net.tflite", 112, false);
+            faceClassifier = TFLiteFaceRecognition.create(getAssets(), "mobile_face_net.tflite", 112, false, getApplicationContext());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -286,6 +286,7 @@ public class RecognitionActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(List<Face> faces) {
                                         if (faces.isEmpty()) {
+                                            Log.d("tryFR", "No face detected.");
                                             imageView.setImageBitmap(input);
                                             return;
                                         }
@@ -345,12 +346,16 @@ public class RecognitionActivity extends AppCompatActivity {
 
             FaceClassifier.Recognition recognition = faceClassifier.recognizeImage(croppedFace,false);
 
+            Log.d("tryFR", recognition.getTitle() + " " + recognition.getDistance());
+
             if (recognition != null && recognition.getTitle() != null && recognition.getDistance() < 1) {
                 Paint p1 = new Paint();
                 p1.setColor(Color.WHITE);
                 p1.setTextSize(60);
 
                 canvas.drawText(recognition.getTitle(), bounds.left, bounds.top, p1);
+            } else {
+                Log.d("tryFR", "No face recognition.");
             }
         } catch (Throwable e) {
             e.printStackTrace();

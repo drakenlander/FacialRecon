@@ -166,7 +166,7 @@ public class RegisterActivity extends AppCompatActivity {
         detector = FaceDetection.getClient(highAccuracyOpts);
 
         try {
-            faceClassifier = TFLiteFaceRecognition.create(getAssets(), "mobile_face_net.tflite", 112, false);
+            faceClassifier = TFLiteFaceRecognition.create(getAssets(), "mobile_face_net.tflite", 112, false, getApplicationContext());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
