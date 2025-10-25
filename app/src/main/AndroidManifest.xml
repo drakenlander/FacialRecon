@@ -57,6 +57,16 @@
             android:configChanges="orientation|screenSize"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".ViewFacesActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+        </activity>
+        <activity
+            android:name=".ViewAttemptsActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

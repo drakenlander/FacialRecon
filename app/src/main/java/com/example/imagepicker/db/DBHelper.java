@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import android.annotation.SuppressLint;
@@ -15,12 +16,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.example.imagepicker.Attempt;
 import com.example.imagepicker.face_recognition.FaceClassifier;
 
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "MyFaces.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
 
     public static final String FACE_TABLE_NAME = "faces";
     public static final String FACE_COLUMN_ID = "id";
@@ -117,6 +119,42 @@ public class DBHelper extends SQLiteOpenHelper {
         boolean exists = res.getCount() > 0;
         res.close();
         return exists;
+    }
+
+    @SuppressLint("Range")
+    public List<FaceClassifier.Recognition> getAllFacesAsList() {
+        List<FaceClassifier.Recognition> faces = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + FACE_TABLE_NAME, null);
+        res.moveToFirst();
+
+        while (!res.isAfterLast()) {
+            String id = res.getString(res.getColumnIndex(FACE_COLUMN_ID));
+            String name = res.getString(res.getColumnIndex(FACE_COLUMN_NAME));
+            faces.add(new FaceClassifier.Recognition(id, name, -1f, null));
+            res.moveToNext();
+        }
+        res.close();
+        return faces;
+    }
+
+    @SuppressLint("Range")
+    public List<Attempt> getAllAttempts() {
+        List<Attempt> attempts = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from " + ATTEMPTS_TABLE_NAME, null);
+        res.moveToFirst();
+
+        while (!res.isAfterLast()) {
+            int id = res.getInt(res.getColumnIndex(ATTEMPTS_COLUMN_ID));
+            Integer personId = res.isNull(res.getColumnIndex(ATTEMPTS_COLUMN_PERSON_ID)) ? null : res.getInt(res.getColumnIndex(ATTEMPTS_COLUMN_PERSON_ID));
+            String personName = res.getString(res.getColumnIndex(ATTEMPTS_COLUMN_PERSON_NAME));
+            String timestamp = res.getString(res.getColumnIndex(ATTEMPTS_COLUMN_TIMESTAMP));
+            attempts.add(new Attempt(id, personId, personName, timestamp));
+            res.moveToNext();
+        }
+        res.close();
+        return attempts;
     }
 
     @SuppressLint("Range")
