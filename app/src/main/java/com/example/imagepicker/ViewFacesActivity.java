@@ -17,6 +17,7 @@ public class ViewFacesActivity extends AppCompatActivity {
     private RecyclerView facesRecyclerView;
     private FacesAdapter facesAdapter;
     private DBHelper dbHelper;
+    private int role;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +25,7 @@ public class ViewFacesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_faces);
 
         dbHelper = new DBHelper(this);
+        role = getIntent().getIntExtra("role", -1);
 
         facesRecyclerView = findViewById(R.id.faces_recycler_view);
         facesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -32,7 +34,7 @@ public class ViewFacesActivity extends AppCompatActivity {
         HashMap<String, FaceClassifier.Recognition> facesMap = dbHelper.getAllFaces();
         ArrayList<FaceClassifier.Recognition> facesList = new ArrayList<>(facesMap.values());
 
-        facesAdapter = new FacesAdapter(facesList);
+        facesAdapter = new FacesAdapter(facesList, role);
         facesRecyclerView.setAdapter(facesAdapter);
     }
 }

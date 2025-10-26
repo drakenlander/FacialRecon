@@ -18,6 +18,7 @@ public class MainMenuActivity extends AppCompatActivity {
     private TextView welcomeText;
     private Button adminButton;
     private Button signUpButton;
+    private CardView manageFacesCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
         adminButton = findViewById(R.id.admin_button);
         signUpButton = findViewById(R.id.sign_up_button);
+        manageFacesCard = findViewById(R.id.manage_faces_card);
 
         // Set up the UI based on the user's role
         setupUIByRole();
@@ -54,11 +56,11 @@ public class MainMenuActivity extends AppCompatActivity {
             }
         });
 
-        CardView viewFacesCard = findViewById(R.id.view_faces_card);
-        viewFacesCard.setOnClickListener(new View.OnClickListener() {
+        manageFacesCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, ViewFacesActivity.class);
+                intent.putExtra("role", role);
                 startActivity(intent);
             }
         });
@@ -99,14 +101,17 @@ public class MainMenuActivity extends AppCompatActivity {
             case 1:
                 adminButton.setVisibility(View.GONE);
                 signUpButton.setVisibility(View.GONE);
+                manageFacesCard.setVisibility(View.VISIBLE);
                 break;
             case 2:
                 adminButton.setVisibility(View.VISIBLE);
                 signUpButton.setVisibility(View.VISIBLE);
+                manageFacesCard.setVisibility(View.VISIBLE);
                 break;
             default:
                 adminButton.setVisibility(View.GONE);
                 signUpButton.setVisibility(View.GONE);
+                manageFacesCard.setVisibility(View.GONE);
                 break;
         }
     }
