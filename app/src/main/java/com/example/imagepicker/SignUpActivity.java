@@ -48,23 +48,49 @@ public class SignUpActivity extends AppCompatActivity {
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String username = usernameInput.getText().toString();
-                String password = passwordInput.getText().toString();
-                String confirmPassword = confirmPasswordInput.getText().toString();
+                String username = usernameInput.getText().toString().trim();
+                String password = passwordInput.getText().toString().trim();
+                String confirmPassword = confirmPasswordInput.getText().toString().trim();
                 String securityQuestion = securityQuestionSpinner.getSelectedItem().toString();
-                String securityAnswer = securityAnswerInput.getText().toString();
-
+                String securityAnswer = securityAnswerInput.getText().toString().trim();
                 int selectedRoleId = roleRadioGroup.getCheckedRadioButtonId();
+
+                if (username.isEmpty()) {
+                    usernameInput.setError("Username is required");
+                    return;
+                }
+
+                if (password.isEmpty()) {
+                    passwordInput.setError("Password is required");
+                    return;
+                }
+
+                if (confirmPassword.isEmpty()) {
+                    confirmPasswordInput.setError("Please confirm your password");
+                    return;
+                }
+
+                if (!password.equals(confirmPassword)) {
+                    Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (securityAnswer.isEmpty()) {
+                    securityAnswerInput.setError("Security answer is required");
+                    return;
+                }
+
+                if (selectedRoleId == -1) {
+                    Toast.makeText(SignUpActivity.this, "Please select a role", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 RadioButton selectedRadioButton = findViewById(selectedRoleId);
                 int role = selectedRadioButton.getText().toString().equals("Role 1") ? 1 : 2;
 
-                if (password.equals(confirmPassword)) {
-                    dbHelper.insertUser(username, password, securityQuestion, securityAnswer, role);
-                    Toast.makeText(SignUpActivity.this, "Sign up successful!", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-                }
+                dbHelper.insertUser(username, password, securityQuestion, securityAnswer, role);
+                Toast.makeText(SignUpActivity.this, "Sign up successful!", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
     }

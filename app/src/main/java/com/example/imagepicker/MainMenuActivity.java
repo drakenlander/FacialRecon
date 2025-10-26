@@ -17,6 +17,7 @@ public class MainMenuActivity extends AppCompatActivity {
     private int role;
     private TextView welcomeText;
     private Button adminButton;
+    private Button signUpButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class MainMenuActivity extends AppCompatActivity {
         welcomeText.setText("Hi, " + username + "! (Role: " + role + ")");
 
         adminButton = findViewById(R.id.admin_button);
+        signUpButton = findViewById(R.id.sign_up_button);
 
         // Set up the UI based on the user's role
         setupUIByRole();
@@ -40,6 +42,14 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        signUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMenuActivity.this, SignUpActivity.class);
                 startActivity(intent);
             }
         });
@@ -88,12 +98,15 @@ public class MainMenuActivity extends AppCompatActivity {
         switch (role) {
             case 1:
                 adminButton.setVisibility(View.GONE);
+                signUpButton.setVisibility(View.GONE);
                 break;
             case 2:
                 adminButton.setVisibility(View.VISIBLE);
+                signUpButton.setVisibility(View.VISIBLE);
                 break;
             default:
                 adminButton.setVisibility(View.GONE);
+                signUpButton.setVisibility(View.GONE);
                 break;
         }
     }

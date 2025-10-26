@@ -124,6 +124,19 @@
         app:layout_constraintTop_toBottomOf="@+id/modify_credentials_card" />
 
     <Button
+        android:id="@+id/sign_up_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:text="Sign Up"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/admin_button" />
+
+    <Button
         android:id="@+id/logout_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
