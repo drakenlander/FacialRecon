@@ -120,7 +120,7 @@ public class TFLiteFaceRecognition implements FaceClassifier {
 
         Recognition result;
 
-        if (registered.size() > 0) {
+        if (!registered.isEmpty()) {
             final Pair<Recognition, Float> nearest = findNearest(embeddings[0]);
             if (nearest != null) {
                 final Recognition nearestRecognition = nearest.first;

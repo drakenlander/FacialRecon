@@ -22,7 +22,7 @@ import com.example.imagepicker.face_recognition.FaceClassifier;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "MyFaces.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     public static final String FACE_TABLE_NAME = "faces";
     public static final String FACE_COLUMN_ID = "id";
@@ -33,6 +33,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USERS_COLUMN_ID = "id";
     public static final String USERS_COLUMN_USERNAME = "username";
     public static final String USERS_COLUMN_PASSWORD = "password";
+    public static final String USERS_COLUMN_SECURITY_QUESTION = "security_question";
+    public static final String USERS_COLUMN_SECURITY_ANSWER = "security_answer";
 
     public static final String ATTEMPTS_TABLE_NAME = "attempts";
     public static final String ATTEMPTS_COLUMN_ID = "id";
@@ -57,7 +59,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 "CREATE TABLE " + USERS_TABLE_NAME + " (" +
                         USERS_COLUMN_ID + " INTEGER PRIMARY KEY, " +
                         USERS_COLUMN_USERNAME + " TEXT, " +
-                        USERS_COLUMN_PASSWORD + " TEXT)"
+                        USERS_COLUMN_PASSWORD + " TEXT, " +
+                        USERS_COLUMN_SECURITY_QUESTION + " TEXT, " +
+                        USERS_COLUMN_SECURITY_ANSWER + " TEXT)"
         );
         db.execSQL(
                 "CREATE TABLE " + ATTEMPTS_TABLE_NAME + " (" +
@@ -91,11 +95,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean insertUser(String username, String password) {
+    public boolean insertUser(String username, String password, String securityQuestion, String securityAnswer) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(USERS_COLUMN_USERNAME, username);
         contentValues.put(USERS_COLUMN_PASSWORD, password); // WARNING: Storing plain text password
+        contentValues.put(USERS_COLUMN_SECURITY_QUESTION, securityQuestion);
+        contentValues.put(USERS_COLUMN_SECURITY_ANSWER, securityAnswer);
         db.insert(USERS_TABLE_NAME, null, contentValues);
         return true;
     }
@@ -119,6 +125,21 @@ public class DBHelper extends SQLiteOpenHelper {
         boolean exists = res.getCount() > 0;
         res.close();
         return exists;
+    }
+
+    public boolean checkSecurityAnswer(String username, String securityQuestion, String securityAnswer) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select * from users where username = ? and security_question = ? and security_answer = ?", new String[]{username, securityQuestion, securityAnswer});
+        boolean exists = res.getCount() > 0;
+        res.close();
+        return exists;
+    }
+
+    public void updatePassword(String username, String newPassword) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(USERS_COLUMN_PASSWORD, newPassword);
+        db.update(USERS_TABLE_NAME, contentValues, "username = ? ", new String[] { username } );
     }
 
     @SuppressLint("Range")

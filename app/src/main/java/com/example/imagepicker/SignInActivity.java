@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ public class SignInActivity extends AppCompatActivity {
     private EditText usernameInput;
     private EditText passwordInput;
     private Button signInButton;
+    private TextView forgotPasswordText;
     private DBHelper dbHelper;
 
     @Override
@@ -29,6 +31,7 @@ public class SignInActivity extends AppCompatActivity {
         usernameInput = findViewById(R.id.username_input);
         passwordInput = findViewById(R.id.password_input);
         signInButton = findViewById(R.id.sign_in_button);
+        forgotPasswordText = findViewById(R.id.forgot_password_text);
 
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -39,6 +42,7 @@ public class SignInActivity extends AppCompatActivity {
                 try {
                     if (dbHelper.checkUser(username, password)) {
                         Intent intent = new Intent(SignInActivity.this, MainMenuActivity.class);
+                        intent.putExtra("username", username);
                         startActivity(intent);
                         finish();
                     } else {
@@ -48,6 +52,14 @@ public class SignInActivity extends AppCompatActivity {
                     Log.e("SignInActivity", "Sign-in failed", e);
                     Toast.makeText(SignInActivity.this, "An error occurred during sign-in.", Toast.LENGTH_LONG).show();
                 }
+            }
+        });
+
+        forgotPasswordText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SignInActivity.this, ForgotPasswordActivity.class);
+                startActivity(intent);
             }
         });
     }

@@ -1,5 +1,6 @@
 package com.example.imagepicker;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -12,50 +13,45 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.imagepicker.db.DBHelper;
 
-public class SignUpActivity extends AppCompatActivity {
+public class ForgotPasswordActivity extends AppCompatActivity {
 
     private EditText usernameInput;
-    private EditText passwordInput;
-    private EditText confirmPasswordInput;
     private Spinner securityQuestionSpinner;
     private EditText securityAnswerInput;
-    private Button signUpButton;
+    private Button submitButton;
     private DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
+        setContentView(R.layout.activity_forgot_password);
 
         dbHelper = new DBHelper(this);
 
         usernameInput = findViewById(R.id.username_input);
-        passwordInput = findViewById(R.id.password_input);
-        confirmPasswordInput = findViewById(R.id.confirm_password_input);
         securityQuestionSpinner = findViewById(R.id.security_question_spinner);
         securityAnswerInput = findViewById(R.id.security_answer_input);
-        signUpButton = findViewById(R.id.sign_up_button);
+        submitButton = findViewById(R.id.submit_button);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.security_questions, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         securityQuestionSpinner.setAdapter(adapter);
 
-        signUpButton.setOnClickListener(new View.OnClickListener() {
+        submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String username = usernameInput.getText().toString();
-                String password = passwordInput.getText().toString();
-                String confirmPassword = confirmPasswordInput.getText().toString();
                 String securityQuestion = securityQuestionSpinner.getSelectedItem().toString();
                 String securityAnswer = securityAnswerInput.getText().toString();
 
-                if (password.equals(confirmPassword)) {
-                    dbHelper.insertUser(username, password, securityQuestion, securityAnswer);
-                    Toast.makeText(SignUpActivity.this, "Sign up successful!", Toast.LENGTH_SHORT).show();
+                if (dbHelper.checkSecurityAnswer(username, securityQuestion, securityAnswer)) {
+                    Intent intent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
+                    intent.putExtra("username", username);
+                    startActivity(intent);
                     finish();
                 } else {
-                    Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ForgotPasswordActivity.this, "Invalid details", Toast.LENGTH_SHORT).show();
                 }
             }
         });

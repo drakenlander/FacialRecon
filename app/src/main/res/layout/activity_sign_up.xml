@@ -41,14 +41,34 @@
         app:layout_constraintStart_toStartOf="@+id/password_input"
         app:layout_constraintTop_toBottomOf="@+id/password_input" />
 
+    <Spinner
+        android:id="@+id/security_question_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="@+id/confirm_password_input"
+        app:layout_constraintStart_toStartOf="@+id/confirm_password_input"
+        app:layout_constraintTop_toBottomOf="@+id/confirm_password_input" />
+
+    <EditText
+        android:id="@+id/security_answer_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:hint="Security Answer"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="@+id/security_question_spinner"
+        app:layout_constraintStart_toStartOf="@+id/security_question_spinner"
+        app:layout_constraintTop_toBottomOf="@+id/security_question_spinner" />
+
     <Button
         android:id="@+id/sign_up_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Sign Up"
-        app:layout_constraintEnd_toEndOf="@+id/confirm_password_input"
-        app:layout_constraintStart_toStartOf="@+id/confirm_password_input"
-        app:layout_constraintTop_toBottomOf="@+id/confirm_password_input" />
+        app:layout_constraintEnd_toEndOf="@+id/security_answer_input"
+        app:layout_constraintStart_toStartOf="@+id/security_answer_input"
+        app:layout_constraintTop_toBottomOf="@+id/security_answer_input" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
