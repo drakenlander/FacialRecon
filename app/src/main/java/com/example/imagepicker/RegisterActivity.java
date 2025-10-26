@@ -162,6 +162,8 @@ public class RegisterActivity extends AppCompatActivity {
                         p1.setStyle(Paint.Style.STROKE);
                         p1.setStrokeWidth(5);
                         canvas.drawRect(faces.get(0).getBoundingBox(), p1);
+                    } else {
+                        Toast.makeText(RegisterActivity.this, "No face detected in the picture.", Toast.LENGTH_SHORT).show();
                     }
                     imageView.setImageBitmap(mutableBmp);
                 })

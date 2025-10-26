@@ -1,14 +1,19 @@
 package com.example.imagepicker;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.imagepicker.db.DBHelper;
 import com.example.imagepicker.face_recognition.FaceClassifier;
 
 import java.util.ArrayList;
@@ -17,8 +22,10 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
 
     private final ArrayList<FaceClassifier.Recognition> facesList;
     private final int role;
+    private final Context context;
 
-    public FacesAdapter(ArrayList<FaceClassifier.Recognition> facesList, int role) {
+    public FacesAdapter(Context context, ArrayList<FaceClassifier.Recognition> facesList, int role) {
+        this.context = context;
         this.facesList = facesList;
         this.role = role;
     }
@@ -39,6 +46,23 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
         if (role == 2) {
             holder.modifyButton.setVisibility(View.VISIBLE);
             holder.deleteButton.setVisibility(View.VISIBLE);
+
+            holder.deleteButton.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Delete Face")
+                        .setMessage("Are you sure you want to delete this face?")
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            DBHelper dbHelper = new DBHelper(context);
+                            dbHelper.deleteFace(recognition.getId());
+                            facesList.remove(position);
+                            notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, facesList.size());
+                            Toast.makeText(context, "Face deleted successfully", Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+            });
+
         } else {
             holder.modifyButton.setVisibility(View.GONE);
             holder.deleteButton.setVisibility(View.GONE);

@@ -34,7 +34,7 @@ public class ViewFacesActivity extends AppCompatActivity {
         HashMap<String, FaceClassifier.Recognition> facesMap = dbHelper.getAllFaces();
         ArrayList<FaceClassifier.Recognition> facesList = new ArrayList<>(facesMap.values());
 
-        facesAdapter = new FacesAdapter(facesList, role);
+        facesAdapter = new FacesAdapter(this, facesList, role);
         facesRecyclerView.setAdapter(facesAdapter);
     }
 }

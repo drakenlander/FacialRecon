@@ -151,6 +151,11 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update(USERS_TABLE_NAME, contentValues, "username = ? ", new String[] { username } );
     }
 
+    public void deleteFace(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(FACE_TABLE_NAME, "id = ?", new String[]{id});
+    }
+
     @SuppressLint("Range")
     public User getUser(String username) {
         SQLiteDatabase db = this.getReadableDatabase();
