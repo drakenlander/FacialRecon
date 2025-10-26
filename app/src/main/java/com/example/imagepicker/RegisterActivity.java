@@ -50,6 +50,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Uri image_uri;
     private FaceDetector detector;
     private FaceClassifier faceClassifier;
+    private String faceName;
 
     private final ActivityResultLauncher<Intent> galleryActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -87,6 +88,8 @@ public class RegisterActivity extends AppCompatActivity {
                 image_uri = Uri.parse(uriString);
             }
         }
+
+        faceName = getIntent().getStringExtra("face_name");
 
         imageView = findViewById(R.id.imageView2);
         galleryCard = findViewById(R.id.gallerycard);
@@ -194,10 +197,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         imageView1.setImageBitmap(face);
 
+        if (faceName != null) {
+            editText.setText(faceName);
+        }
+
         register.setOnClickListener(view -> {
             String name = editText.getText().toString().trim();
             if (name.isEmpty()) {
-                editText.setError("Enter Name");
+                editText.setError("Enter Name ");
             } else {
                 faceClassifier.register(name, recognition);
                 Toast.makeText(RegisterActivity.this, "Registered " + name, Toast.LENGTH_SHORT).show();

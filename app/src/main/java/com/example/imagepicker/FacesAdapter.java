@@ -3,6 +3,7 @@ package com.example.imagepicker;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +47,19 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
         if (role == 2) {
             holder.modifyButton.setVisibility(View.VISIBLE);
             holder.deleteButton.setVisibility(View.VISIBLE);
+
+            holder.modifyButton.setOnClickListener(v -> {
+                DBHelper dbHelper = new DBHelper(context);
+                dbHelper.deleteFace(recognition.getId());
+
+                Intent intent = new Intent(context, RegisterActivity.class);
+                intent.putExtra("face_name", recognition.getTitle());
+                context.startActivity(intent);
+
+                facesList.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, facesList.size());
+            });
 
             holder.deleteButton.setOnClickListener(v -> {
                 new AlertDialog.Builder(context)
