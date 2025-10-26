@@ -40,9 +40,11 @@ public class SignInActivity extends AppCompatActivity {
                 String password = passwordInput.getText().toString();
 
                 try {
-                    if (dbHelper.checkUser(username, password)) {
+                    int role = dbHelper.checkUser(username, password);
+                    if (role != -1) {
                         Intent intent = new Intent(SignInActivity.this, MainMenuActivity.class);
                         intent.putExtra("username", username);
+                        intent.putExtra("role", role);
                         startActivity(intent);
                         finish();
                     } else {

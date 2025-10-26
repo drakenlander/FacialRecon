@@ -14,19 +14,35 @@ public class MainMenuActivity extends AppCompatActivity {
 
     private static final int MODIFY_CREDENTIALS_REQUEST = 1;
     private String username;
+    private int role;
     private TextView welcomeText;
+    private Button adminButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
-        // Get the username from the Intent
+        // Get the username and role from the Intent
         username = getIntent().getStringExtra("username");
+        role = getIntent().getIntExtra("role", -1);
 
         // Set the welcome text
         welcomeText = findViewById(R.id.welcome_text);
-        welcomeText.setText("Hi, " + username + "!");
+        welcomeText.setText("Hi, " + username + "! (Role: " + role + ")");
+
+        adminButton = findViewById(R.id.admin_button);
+
+        // Set up the UI based on the user's role
+        setupUIByRole();
+
+        adminButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMenuActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
 
         CardView viewFacesCard = findViewById(R.id.view_faces_card);
         viewFacesCard.setOnClickListener(new View.OnClickListener() {
@@ -68,13 +84,27 @@ public class MainMenuActivity extends AppCompatActivity {
         });
     }
 
+    private void setupUIByRole() {
+        switch (role) {
+            case 1:
+                adminButton.setVisibility(View.GONE);
+                break;
+            case 2:
+                adminButton.setVisibility(View.VISIBLE);
+                break;
+            default:
+                adminButton.setVisibility(View.GONE);
+                break;
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == MODIFY_CREDENTIALS_REQUEST && resultCode == RESULT_OK && data != null) {
             username = data.getStringExtra("username");
-            welcomeText.setText("Hi, " + username + "!");
+            welcomeText.setText("Hi, " + username + "! (Role: " + role + ")");
         }
     }
 

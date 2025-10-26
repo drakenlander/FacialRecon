@@ -5,6 +5,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -19,6 +21,7 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText confirmPasswordInput;
     private Spinner securityQuestionSpinner;
     private EditText securityAnswerInput;
+    private RadioGroup roleRadioGroup;
     private Button signUpButton;
     private DBHelper dbHelper;
 
@@ -34,6 +37,7 @@ public class SignUpActivity extends AppCompatActivity {
         confirmPasswordInput = findViewById(R.id.confirm_password_input);
         securityQuestionSpinner = findViewById(R.id.security_question_spinner);
         securityAnswerInput = findViewById(R.id.security_answer_input);
+        roleRadioGroup = findViewById(R.id.role_radio_group);
         signUpButton = findViewById(R.id.sign_up_button);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -50,8 +54,12 @@ public class SignUpActivity extends AppCompatActivity {
                 String securityQuestion = securityQuestionSpinner.getSelectedItem().toString();
                 String securityAnswer = securityAnswerInput.getText().toString();
 
+                int selectedRoleId = roleRadioGroup.getCheckedRadioButtonId();
+                RadioButton selectedRadioButton = findViewById(selectedRoleId);
+                int role = selectedRadioButton.getText().toString().equals("Role 1") ? 1 : 2;
+
                 if (password.equals(confirmPassword)) {
-                    dbHelper.insertUser(username, password, securityQuestion, securityAnswer);
+                    dbHelper.insertUser(username, password, securityQuestion, securityAnswer, role);
                     Toast.makeText(SignUpActivity.this, "Sign up successful!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {

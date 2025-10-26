@@ -23,7 +23,7 @@ import com.example.imagepicker.face_recognition.FaceClassifier;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "MyFaces.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     public static final String FACE_TABLE_NAME = "faces";
     public static final String FACE_COLUMN_ID = "id";
@@ -36,6 +36,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USERS_COLUMN_PASSWORD = "password";
     public static final String USERS_COLUMN_SECURITY_QUESTION = "security_question";
     public static final String USERS_COLUMN_SECURITY_ANSWER = "security_answer";
+    public static final String USERS_COLUMN_ROLE = "role";
 
     public static final String ATTEMPTS_TABLE_NAME = "attempts";
     public static final String ATTEMPTS_COLUMN_ID = "id";
@@ -62,7 +63,8 @@ public class DBHelper extends SQLiteOpenHelper {
                         USERS_COLUMN_USERNAME + " TEXT, " +
                         USERS_COLUMN_PASSWORD + " TEXT, " +
                         USERS_COLUMN_SECURITY_QUESTION + " TEXT, " +
-                        USERS_COLUMN_SECURITY_ANSWER + " TEXT)"
+                        USERS_COLUMN_SECURITY_ANSWER + " TEXT, " +
+                        USERS_COLUMN_ROLE + " INTEGER)"
         );
         db.execSQL(
                 "CREATE TABLE " + ATTEMPTS_TABLE_NAME + " (" +
@@ -96,13 +98,14 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean insertUser(String username, String password, String securityQuestion, String securityAnswer) {
+    public boolean insertUser(String username, String password, String securityQuestion, String securityAnswer, int role) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(USERS_COLUMN_USERNAME, username);
         contentValues.put(USERS_COLUMN_PASSWORD, password); // WARNING: Storing plain text password
         contentValues.put(USERS_COLUMN_SECURITY_QUESTION, securityQuestion);
         contentValues.put(USERS_COLUMN_SECURITY_ANSWER, securityAnswer);
+        contentValues.put(USERS_COLUMN_ROLE, role);
         db.insert(USERS_TABLE_NAME, null, contentValues);
         return true;
     }
@@ -120,12 +123,17 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTEMPTS_TABLE_NAME, null, contentValues);
     }
 
-    public boolean checkUser(String username, String password) {
+    public int checkUser(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from users where username = ? and password = ?", new String[]{username, password});
-        boolean exists = res.getCount() > 0;
+        if (res.getCount() > 0) {
+            res.moveToFirst();
+            @SuppressLint("Range") int role = res.getInt(res.getColumnIndex(USERS_COLUMN_ROLE));
+            res.close();
+            return role;
+        }
         res.close();
-        return exists;
+        return -1;
     }
 
     public boolean checkSecurityAnswer(String username, String securityQuestion, String securityAnswer) {
@@ -152,20 +160,22 @@ public class DBHelper extends SQLiteOpenHelper {
             String password = res.getString(res.getColumnIndex(USERS_COLUMN_PASSWORD));
             String securityQuestion = res.getString(res.getColumnIndex(USERS_COLUMN_SECURITY_QUESTION));
             String securityAnswer = res.getString(res.getColumnIndex(USERS_COLUMN_SECURITY_ANSWER));
+            int role = res.getInt(res.getColumnIndex(USERS_COLUMN_ROLE));
             res.close();
-            return new User(username, password, securityQuestion, securityAnswer);
+            return new User(username, password, securityQuestion, securityAnswer, role);
         }
         res.close();
         return null;
     }
 
-    public void updateUser(String oldUsername, String newUsername, String password, String securityQuestion, String securityAnswer) {
+    public void updateUser(String oldUsername, String newUsername, String password, String securityQuestion, String securityAnswer, int role) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(USERS_COLUMN_USERNAME, newUsername);
         contentValues.put(USERS_COLUMN_PASSWORD, password);
         contentValues.put(USERS_COLUMN_SECURITY_QUESTION, securityQuestion);
         contentValues.put(USERS_COLUMN_SECURITY_ANSWER, securityAnswer);
+        contentValues.put(USERS_COLUMN_ROLE, role);
         db.update(USERS_TABLE_NAME, contentValues, "username = ?", new String[]{oldUsername});
     }
 

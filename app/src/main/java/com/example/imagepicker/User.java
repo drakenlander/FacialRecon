@@ -5,12 +5,14 @@ public class User {
     private String password;
     private String securityQuestion;
     private String securityAnswer;
+    private int role;
 
-    public User(String username, String password, String securityQuestion, String securityAnswer) {
+    public User(String username, String password, String securityQuestion, String securityAnswer, int role) {
         this.username = username;
         this.password = password;
         this.securityQuestion = securityQuestion;
         this.securityAnswer = securityAnswer;
+        this.role = role;
     }
 
     public String getUsername() {
@@ -27,5 +29,9 @@ public class User {
 
     public String getSecurityAnswer() {
         return securityAnswer;
+    }
+
+    public int getRole() {
+        return role;
     }
 }

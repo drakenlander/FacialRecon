@@ -27,6 +27,7 @@ public class ModifyCredentialsActivity extends AppCompatActivity {
     private String currentUsername;
     private String originalSecurityQuestion;
     private String originalSecurityAnswer;
+    private int role;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +85,7 @@ public class ModifyCredentialsActivity extends AppCompatActivity {
 
             originalSecurityQuestion = user.getSecurityQuestion();
             originalSecurityAnswer = user.getSecurityAnswer();
+            role = user.getRole();
 
             ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) securityQuestionSpinner.getAdapter();
             int spinnerPosition = adapter.getPosition(user.getSecurityQuestion());
@@ -101,7 +103,7 @@ public class ModifyCredentialsActivity extends AppCompatActivity {
         String securityAnswer = securityAnswerInput.getText().toString();
 
         if (password.equals(confirmPassword)) {
-            dbHelper.updateUser(currentUsername, newUsername, password, securityQuestion, securityAnswer);
+            dbHelper.updateUser(currentUsername, newUsername, password, securityQuestion, securityAnswer, role);
             Toast.makeText(ModifyCredentialsActivity.this, "Credentials updated successfully!", Toast.LENGTH_SHORT).show();
             Intent resultIntent = new Intent();
             resultIntent.putExtra("username", newUsername);

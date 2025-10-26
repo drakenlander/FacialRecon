@@ -35,15 +35,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        Button registerButton = findViewById(R.id.buttonregister);
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-                startActivity(intent);
-            }
-        });
-
         Button recognizeButton = findViewById(R.id.buttonrecognize);
         recognizeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,8 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
+        // By not calling super.onBackPressed(), the back button is disabled.
     }
 }

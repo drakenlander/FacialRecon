@@ -61,14 +61,38 @@
         app:layout_constraintStart_toStartOf="@+id/security_question_spinner"
         app:layout_constraintTop_toBottomOf="@+id/security_question_spinner" />
 
+    <RadioGroup
+        android:id="@+id/role_radio_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="@+id/security_answer_input"
+        app:layout_constraintStart_toStartOf="@+id/security_answer_input"
+        app:layout_constraintTop_toBottomOf="@+id/security_answer_input">
+
+        <RadioButton
+            android:id="@+id/role_1_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Role 1" />
+
+        <RadioButton
+            android:id="@+id/role_2_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Role 2" />
+
+    </RadioGroup>
+
     <Button
         android:id="@+id/sign_up_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Sign Up"
-        app:layout_constraintEnd_toEndOf="@+id/security_answer_input"
-        app:layout_constraintStart_toStartOf="@+id/security_answer_input"
-        app:layout_constraintTop_toBottomOf="@+id/security_answer_input" />
+        app:layout_constraintEnd_toEndOf="@+id/role_radio_group"
+        app:layout_constraintStart_toStartOf="@+id/role_radio_group"
+        app:layout_constraintTop_toBottomOf="@+id/role_radio_group" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
