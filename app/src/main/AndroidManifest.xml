@@ -77,6 +77,11 @@
             android:configChanges="orientation|screenSize"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".ModifyCredentialsActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

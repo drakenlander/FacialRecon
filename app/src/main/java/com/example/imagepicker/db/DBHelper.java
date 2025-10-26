@@ -17,6 +17,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.imagepicker.Attempt;
+import com.example.imagepicker.User;
 import com.example.imagepicker.face_recognition.FaceClassifier;
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -141,6 +142,33 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(USERS_COLUMN_PASSWORD, newPassword);
         db.update(USERS_TABLE_NAME, contentValues, "username = ? ", new String[] { username } );
     }
+
+    @SuppressLint("Range")
+    public User getUser(String username) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from users where username = ?", new String[]{username});
+        if (res.getCount() > 0) {
+            res.moveToFirst();
+            String password = res.getString(res.getColumnIndex(USERS_COLUMN_PASSWORD));
+            String securityQuestion = res.getString(res.getColumnIndex(USERS_COLUMN_SECURITY_QUESTION));
+            String securityAnswer = res.getString(res.getColumnIndex(USERS_COLUMN_SECURITY_ANSWER));
+            res.close();
+            return new User(username, password, securityQuestion, securityAnswer);
+        }
+        res.close();
+        return null;
+    }
+
+    public void updateUser(String oldUsername, String newUsername, String password, String securityQuestion, String securityAnswer) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(USERS_COLUMN_USERNAME, newUsername);
+        contentValues.put(USERS_COLUMN_PASSWORD, password);
+        contentValues.put(USERS_COLUMN_SECURITY_QUESTION, securityQuestion);
+        contentValues.put(USERS_COLUMN_SECURITY_ANSWER, securityAnswer);
+        db.update(USERS_TABLE_NAME, contentValues, "username = ?", new String[]{oldUsername});
+    }
+
 
     @SuppressLint("Range")
     public List<FaceClassifier.Recognition> getAllFacesAsList() {

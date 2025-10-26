@@ -6,10 +6,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 public class MainMenuActivity extends AppCompatActivity {
+
+    private static final int MODIFY_CREDENTIALS_REQUEST = 1;
+    private String username;
+    private TextView welcomeText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,10 +22,10 @@ public class MainMenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_menu);
 
         // Get the username from the Intent
-        String username = getIntent().getStringExtra("username");
+        username = getIntent().getStringExtra("username");
 
         // Set the welcome text
-        TextView welcomeText = findViewById(R.id.welcome_text);
+        welcomeText = findViewById(R.id.welcome_text);
         welcomeText.setText("Hi, " + username + "!");
 
         CardView viewFacesCard = findViewById(R.id.view_faces_card);
@@ -41,6 +46,16 @@ public class MainMenuActivity extends AppCompatActivity {
             }
         });
 
+        CardView modifyCredentialsCard = findViewById(R.id.modify_credentials_card);
+        modifyCredentialsCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMenuActivity.this, ModifyCredentialsActivity.class);
+                intent.putExtra("username", username);
+                startActivityForResult(intent, MODIFY_CREDENTIALS_REQUEST);
+            }
+        });
+
         Button logoutButton = findViewById(R.id.logout_button);
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,6 +66,16 @@ public class MainMenuActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == MODIFY_CREDENTIALS_REQUEST && resultCode == RESULT_OK && data != null) {
+            username = data.getStringExtra("username");
+            welcomeText.setText("Hi, " + username + "!");
+        }
     }
 
     @Override
