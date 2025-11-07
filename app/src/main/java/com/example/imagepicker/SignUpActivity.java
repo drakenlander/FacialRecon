@@ -85,8 +85,7 @@ public class SignUpActivity extends AppCompatActivity {
                     return;
                 }
 
-                RadioButton selectedRadioButton = findViewById(selectedRoleId);
-                int role = selectedRadioButton.getText().toString().equals("Role 1") ? 1 : 2;
+                int role = (selectedRoleId == R.id.role_2_radio) ? 2 : 1;
 
                 dbHelper.insertUser(username, password, securityQuestion, securityAnswer, role);
                 Toast.makeText(SignUpActivity.this, "Sign up successful!", Toast.LENGTH_SHORT).show();
