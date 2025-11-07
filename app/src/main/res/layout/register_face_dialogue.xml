@@ -9,25 +9,25 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Register Face"
-        android:textSize="22sp"
-        android:textStyle="bold"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="20dp"
+        android:text="Añadir a una Persona"
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/dlg_input_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:hint="Name" />
+        android:hint="Nombre" />
 
     <EditText
         android:id="@+id/dlg_input_cif"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:hint="CIF"
+        android:hint="Número CIF"
         android:inputType="number" />
 
     <EditText
@@ -35,20 +35,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:hint="Major" />
+        android:hint="Carrera" />
 
     <EditText
         android:id="@+id/dlg_input_semester"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        android:hint="Semester"
+        android:hint="Semestre"
         android:inputType="number" />
 
     <Button
         android:id="@+id/button2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Register" />
+        android:text="Registrar" />
 
 </LinearLayout>

@@ -9,20 +9,22 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher_round" />
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/uam_fia" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
-        android:text="Image Picker"
+        android:text="Universidad Americana"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="info@imagepicker.com" />
+        android:text="Sistema de Reconocimiento Facial" />
 
 </LinearLayout>

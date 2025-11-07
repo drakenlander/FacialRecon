@@ -13,7 +13,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="150dp"
         android:layout_marginEnd="32dp"
-        android:hint="Username"
+        android:hint="Nombre de Usuario"
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:hint="Password"
+        android:hint="Contraseña"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="@+id/username_input"
         app:layout_constraintStart_toStartOf="@+id/username_input"
@@ -35,7 +35,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:hint="Confirm Password"
+        android:hint="Confirmar Contraseña"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="@+id/password_input"
         app:layout_constraintStart_toStartOf="@+id/password_input"
@@ -55,7 +55,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:hint="Security Answer"
+        android:hint="Respuesta"
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="@+id/security_question_spinner"
         app:layout_constraintStart_toStartOf="@+id/security_question_spinner"
@@ -75,13 +75,13 @@
             android:id="@+id/role_1_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Role 1" />
+            android:text="Operador" />
 
         <RadioButton
             android:id="@+id/role_2_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Role 2" />
+            android:text="Administrador de Datos" />
 
     </RadioGroup>
 
@@ -90,7 +90,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Sign Up"
+        android:text="Registrar Nuevo Usuario"
         app:layout_constraintEnd_toEndOf="@+id/role_radio_group"
         app:layout_constraintStart_toStartOf="@+id/role_radio_group"
         app:layout_constraintTop_toBottomOf="@+id/role_radio_group" />

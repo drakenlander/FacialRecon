@@ -11,21 +11,23 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="150dp"
         android:layout_marginEnd="32dp"
-        android:hint="Username"
+        android:hint="Nombre de Usuario"
         android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@+id/password_input"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <EditText
         android:id="@+id/password_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:hint="Password"
+        android:hint="Contraseña"
         android:inputType="textPassword"
+        app:layout_constraintBottom_toTopOf="@+id/sign_in_button"
         app:layout_constraintEnd_toEndOf="@+id/username_input"
         app:layout_constraintStart_toStartOf="@+id/username_input"
         app:layout_constraintTop_toBottomOf="@+id/username_input" />
@@ -35,7 +37,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Sign In"
+        android:text="Iniciar Sesión"
+        app:layout_constraintBottom_toTopOf="@+id/forgot_password_text"
         app:layout_constraintEnd_toEndOf="@+id/password_input"
         app:layout_constraintStart_toStartOf="@+id/password_input"
         app:layout_constraintTop_toBottomOf="@+id/password_input" />
@@ -45,8 +48,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Forgot Password?"
+        android:text="¿Olvidaste tu Contraseña?"
         android:textColor="@color/purple_500"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/sign_in_button"
         app:layout_constraintTop_toBottomOf="@+id/sign_in_button" />
 

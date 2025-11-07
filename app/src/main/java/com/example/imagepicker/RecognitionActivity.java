@@ -192,6 +192,7 @@ public class RecognitionActivity extends AppCompatActivity {
                 .addOnSuccessListener(faces -> {
                     if (faces.isEmpty()) {
                         imageView.setImageBitmap(input);
+                        Toast.makeText(RecognitionActivity.this, "No face detected.", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     for (Face face : faces) {

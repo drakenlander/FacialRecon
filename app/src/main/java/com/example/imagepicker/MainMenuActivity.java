@@ -31,7 +31,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
         // Set the welcome text
         welcomeText = findViewById(R.id.welcome_text);
-        welcomeText.setText("Hi, " + username + "! (Role: " + role + ")");
+        welcomeText.setText("Hola, " + username + "! (Rol: " + role + ")");
 
         adminButton = findViewById(R.id.admin_button);
         signUpButton = findViewById(R.id.sign_up_button);
@@ -122,7 +122,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
         if (requestCode == MODIFY_CREDENTIALS_REQUEST && resultCode == RESULT_OK && data != null) {
             username = data.getStringExtra("username");
-            welcomeText.setText("Hi, " + username + "! (Role: " + role + ")");
+            welcomeText.setText("Hola, " + username + "! (Rol: " + role + ")");
         }
     }
 
