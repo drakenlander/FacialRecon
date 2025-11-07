@@ -43,6 +43,9 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
         FaceClassifier.Recognition recognition = facesList.get(position);
         holder.faceIdText.setText("ID: " + recognition.getId());
         holder.faceNameText.setText("Name: " + recognition.getTitle());
+        holder.faceCifText.setText("CIF: " + recognition.getCif());
+        holder.faceMajorText.setText("Major: " + recognition.getMajor());
+        holder.faceSemesterText.setText("Semester: " + recognition.getSemester());
 
         if (role == 2) {
             holder.modifyButton.setVisibility(View.VISIBLE);
@@ -91,6 +94,9 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView faceIdText;
         public TextView faceNameText;
+        public TextView faceCifText;
+        public TextView faceMajorText;
+        public TextView faceSemesterText;
         public ImageButton modifyButton;
         public ImageButton deleteButton;
 
@@ -98,6 +104,9 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
             super(view);
             faceIdText = view.findViewById(R.id.face_id_text);
             faceNameText = view.findViewById(R.id.face_name_text);
+            faceCifText = view.findViewById(R.id.face_cif_text);
+            faceMajorText = view.findViewById(R.id.face_major_text);
+            faceSemesterText = view.findViewById(R.id.face_semester_text);
             modifyButton = view.findViewById(R.id.modify_button);
             deleteButton = view.findViewById(R.id.delete_button);
         }

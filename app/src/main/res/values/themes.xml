@@ -2,7 +2,9 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.ImagePicker" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="M">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <style name="Theme.ImagePicker" parent="Base.Theme.ImagePicker" />

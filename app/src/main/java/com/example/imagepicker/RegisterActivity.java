@@ -184,31 +184,55 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Get the face embedding
         FaceClassifier.Recognition recognition = faceClassifier.recognizeImage(croppedFace, true);
-        showRegisterDialogue(croppedFace, recognition);
+        showRegisterDialogue(recognition);
     }
 
-    public void showRegisterDialogue(Bitmap face, FaceClassifier.Recognition recognition) {
+    public void showRegisterDialogue(FaceClassifier.Recognition recognition) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.register_face_dialogue);
 
-        ImageView imageView1 = dialog.findViewById(R.id.dlg_image);
-        EditText editText = dialog.findViewById(R.id.dlg_input);
+        EditText nameInput = dialog.findViewById(R.id.dlg_input_name);
+        EditText cifInput = dialog.findViewById(R.id.dlg_input_cif);
+        EditText majorInput = dialog.findViewById(R.id.dlg_input_major);
+        EditText semesterInput = dialog.findViewById(R.id.dlg_input_semester);
         Button register = dialog.findViewById(R.id.button2);
 
-        imageView1.setImageBitmap(face);
-
         if (faceName != null) {
-            editText.setText(faceName);
+            nameInput.setText(faceName);
         }
 
         register.setOnClickListener(view -> {
-            String name = editText.getText().toString().trim();
+            String name = nameInput.getText().toString().trim();
+            String cifString = cifInput.getText().toString().trim();
+            String major = majorInput.getText().toString().trim();
+            String semesterString = semesterInput.getText().toString().trim();
+
             if (name.isEmpty()) {
-                editText.setError("Enter Name ");
-            } else {
-                faceClassifier.register(name, recognition);
+                nameInput.setError("Enter Name");
+                return;
+            }
+            if (cifString.isEmpty()) {
+                cifInput.setError("Enter CIF");
+                return;
+            }
+            if (major.isEmpty()) {
+                majorInput.setError("Enter Major");
+                return;
+            }
+            if (semesterString.isEmpty()) {
+                semesterInput.setError("Enter Semester");
+                return;
+            }
+
+            try {
+                int cif = Integer.parseInt(cifString);
+                int semester = Integer.parseInt(semesterString);
+
+                faceClassifier.register(name, cif, major, semester, recognition);
                 Toast.makeText(RegisterActivity.this, "Registered " + name, Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
+            } catch (NumberFormatException e) {
+                Toast.makeText(RegisterActivity.this, "Invalid number format in CIF or Semester", Toast.LENGTH_SHORT).show();
             }
         });
 

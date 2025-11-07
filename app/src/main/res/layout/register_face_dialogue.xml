@@ -1,48 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="300dp"
-    android:layout_height="350dp"
-    android:gravity="center_horizontal"
-    android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:minWidth="300dp">
 
     <TextView
-        android:id="@+id/dlg_title"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:background="@android:color/holo_purple"
-        android:gravity="center"
-        android:text="Registration"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        tools:text="Registration" />
-
-    <ImageView
-        android:id="@+id/dlg_image"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Register Face"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp" />
 
     <EditText
-        android:id="@+id/dlg_input"
-        android:layout_width="200dp"
+        android:id="@+id/dlg_input_name"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:hint="Enter Name"
-        tools:hint="Enter Name" />
+        android:layout_marginBottom="8dp"
+        android:hint="Name" />
+
+    <EditText
+        android:id="@+id/dlg_input_cif"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:hint="CIF"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/dlg_input_major"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:hint="Major" />
+
+    <EditText
+        android:id="@+id/dlg_input_semester"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:hint="Semester"
+        android:inputType="number" />
 
     <Button
         android:id="@+id/button2"
-        style="@android:style/Widget.Button.Small"
-        android:layout_width="200dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="10dp"
-        android:text="Register"
-        android:textColor="@color/white" />
-
+        android:text="Register" />
 
 </LinearLayout>

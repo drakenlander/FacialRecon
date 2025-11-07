@@ -37,8 +37,9 @@ public class TFLiteFaceRecognition implements FaceClassifier {
         this.dbHelper = new DBHelper(ctx);
     }
 
-    public void register(String name, Recognition rec) {
-        dbHelper.insertFace(name, rec.getEmbeeding());
+    @Override
+    public void register(String name, int cif, String major, int semester, Recognition rec) {
+        dbHelper.insertFace(name, cif, major, semester, rec.getEmbeeding());
         loadRegisteredFaces();
     }
 
@@ -126,12 +127,12 @@ public class TFLiteFaceRecognition implements FaceClassifier {
                 final Recognition nearestRecognition = nearest.first;
                 final float distance = nearest.second;
 
-                result = new Recognition(nearestRecognition.getId(), nearestRecognition.getTitle(), distance, nearestRecognition.getLocation());
+                result = new Recognition(nearestRecognition.getId(), nearestRecognition.getTitle(), nearestRecognition.getCif(), nearestRecognition.getMajor(), nearestRecognition.getSemester(), distance, nearestRecognition.getLocation());
             } else {
-                result = new Recognition(null, "Unknown", -1f, new RectF());
+                result = new Recognition(null, "Unknown", 0, "", 0, -1f, new RectF());
             }
         } else {
-            result = new Recognition(null, "Unknown", -1f, new RectF());
+            result = new Recognition(null, "Unknown", 0, "", 0, -1f, new RectF());
         }
 
         if (storeExtra) {

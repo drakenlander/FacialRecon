@@ -23,11 +23,14 @@ import com.example.imagepicker.face_recognition.FaceClassifier;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "MyFaces.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     public static final String FACE_TABLE_NAME = "faces";
     public static final String FACE_COLUMN_ID = "id";
     public static final String FACE_COLUMN_NAME = "name";
+    public static final String FACE_COLUMN_CIF = "CIF";
+    public static final String FACE_COLUMN_MAJOR = "major";
+    public static final String FACE_COLUMN_SEMESTER = "semester";
     public static final String FACE_COLUMN_EMBEDDING = "embedding";
 
     public static final String USERS_TABLE_NAME = "users";
@@ -55,6 +58,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 "CREATE TABLE " + FACE_TABLE_NAME + " (" +
                         FACE_COLUMN_ID + " INTEGER PRIMARY KEY, " +
                         FACE_COLUMN_NAME + " TEXT, " +
+                        FACE_COLUMN_CIF + " INTEGER, " +
+                        FACE_COLUMN_MAJOR + " TEXT, " +
+                        FACE_COLUMN_SEMESTER + " INTEGER, " +
                         FACE_COLUMN_EMBEDDING + " TEXT)"
         );
         db.execSQL(
@@ -84,7 +90,7 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertFace (String name, Object embedding) {
+    public boolean insertFace(String name, int cif, String major, int semester, Object embedding) {
         float[][] floatList = (float[][]) embedding;
         StringBuilder embeddingString = new StringBuilder();
         for(Float f: floatList[0]){
@@ -93,6 +99,9 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(FACE_COLUMN_NAME, name);
+        contentValues.put(FACE_COLUMN_CIF, cif);
+        contentValues.put(FACE_COLUMN_MAJOR, major);
+        contentValues.put(FACE_COLUMN_SEMESTER, semester);
         contentValues.put(FACE_COLUMN_EMBEDDING, embeddingString.toString());
         db.insert(FACE_TABLE_NAME, null, contentValues);
         return true;
@@ -195,7 +204,10 @@ public class DBHelper extends SQLiteOpenHelper {
         while (!res.isAfterLast()) {
             String id = res.getString(res.getColumnIndex(FACE_COLUMN_ID));
             String name = res.getString(res.getColumnIndex(FACE_COLUMN_NAME));
-            faces.add(new FaceClassifier.Recognition(id, name, -1f, null));
+            int cif = res.getInt(res.getColumnIndex(FACE_COLUMN_CIF));
+            String major = res.getString(res.getColumnIndex(FACE_COLUMN_MAJOR));
+            int semester = res.getInt(res.getColumnIndex(FACE_COLUMN_SEMESTER));
+            faces.add(new FaceClassifier.Recognition(id, name, cif, major, semester, -1f, null));
             res.moveToNext();
         }
         res.close();
@@ -231,6 +243,9 @@ public class DBHelper extends SQLiteOpenHelper {
         while(!res.isAfterLast()){
             String id = res.getString(res.getColumnIndex(FACE_COLUMN_ID));
             String name = res.getString(res.getColumnIndex(FACE_COLUMN_NAME));
+            int cif = res.getInt(res.getColumnIndex(FACE_COLUMN_CIF));
+            String major = res.getString(res.getColumnIndex(FACE_COLUMN_MAJOR));
+            int semester = res.getInt(res.getColumnIndex(FACE_COLUMN_SEMESTER));
             String embeddingString = res.getString(res.getColumnIndex(FACE_COLUMN_EMBEDDING));
             String[] stringList = embeddingString.split(",");
             if (stringList.length == 0) {
@@ -244,7 +259,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 }
             }
 
-            FaceClassifier.Recognition recognition = new FaceClassifier.Recognition(id, name, -1f, null);
+            FaceClassifier.Recognition recognition = new FaceClassifier.Recognition(id, name, cif, major, semester, -1f, null);
             recognition.setEmbeeding(embeedings);
             registered.put(name, recognition);
             res.moveToNext();

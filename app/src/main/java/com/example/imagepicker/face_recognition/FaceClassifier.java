@@ -6,7 +6,7 @@ import android.graphics.RectF;
 /** Generic interface for interacting with different recognition engines. */
 public interface FaceClassifier {
 
-    void register(String name, Recognition recognition);
+    void register(String name, int cif, String major, int semester, Recognition recognition);
 
     Recognition recognizeImage(Bitmap bitmap, boolean getExtra);
 
@@ -15,6 +15,9 @@ public interface FaceClassifier {
 
         /** Display name for the recognition. */
         private final String title;
+        private final int cif;
+        private final String major;
+        private final int semester;
         // A sortable score for how good the recognition is relative to others. Lower should be better.
         private final Float distance;
         private Object embeeding;
@@ -23,9 +26,12 @@ public interface FaceClassifier {
         private Bitmap crop;
 
         public Recognition(
-                final String id, final String title, final Float distance, final RectF location) {
+                final String id, final String title, final int cif, final String major, final int semester, final Float distance, final RectF location) {
             this.id = id;
             this.title = title;
+            this.cif = cif;
+            this.major = major;
+            this.semester = semester;
             this.distance = distance;
             this.location = location;
             this.embeeding = null;
@@ -33,9 +39,12 @@ public interface FaceClassifier {
         }
 
         public Recognition(
-                final String title, Object embedding) {
+                final String title, final int cif, final String major, final int semester, Object embedding) {
             this.id = null;
             this.title = title;
+            this.cif = cif;
+            this.major = major;
+            this.semester = semester;
             this.distance = null;
             this.location = null;
             this.embeeding = embedding;
@@ -55,6 +64,18 @@ public interface FaceClassifier {
 
         public String getTitle() {
             return title;
+        }
+
+        public int getCif() {
+            return cif;
+        }
+
+        public String getMajor() {
+            return major;
+        }
+
+        public int getSemester() {
+            return semester;
         }
 
         public Float getDistance() {
