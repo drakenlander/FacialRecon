@@ -5,12 +5,16 @@ public class Attempt {
     private final Integer personId;
     private final String personName;
     private final String timestamp;
+    private final String idCard;
+    private final String intent;
 
-    public Attempt(int id, Integer personId, String personName, String timestamp) {
+    public Attempt(int id, Integer personId, String personName, String timestamp, String idCard, String intent) {
         this.id = id;
         this.personId = personId;
         this.personName = personName;
         this.timestamp = timestamp;
+        this.idCard = idCard;
+        this.intent = intent;
     }
 
     public int getId() {
@@ -27,5 +31,13 @@ public class Attempt {
 
     public String getTimestamp() {
         return timestamp;
+    }
+
+    public String getIdCard() {
+        return idCard;
+    }
+
+    public String getIntent() {
+        return intent;
     }
 }

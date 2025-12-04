@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:minWidth="300dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rostro no Reconocido"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Por favor, ingrese sus datos personales para registrar el intento:"
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/unrecognized_name_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:hint="Nombre" />
+
+    <EditText
+        android:id="@+id/unrecognized_id_card_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:hint="Número de Cédula" />
+
+    <EditText
+        android:id="@+id/unrecognized_intent_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:hint="Motivo de Visita" />
+
+    <Button
+        android:id="@+id/log_attempt_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Registrar Intento" />
+
+</LinearLayout>

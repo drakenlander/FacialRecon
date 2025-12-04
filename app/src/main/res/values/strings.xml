@@ -12,9 +12,14 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string-array name="security_questions">
-        <item>What is your mothers maiden name?</item>
-        <item>What was the name of your first pet?</item>
-        <item>What was the name of your elementary school?</item>
-        <item>In what city were you born?</item>
+        <item>¿Cuál es el apellido de soltera de tu madre?</item>
+        <item>¿Cuál era el nombre de tu primera mascota?</item>
+        <item>¿Cómo se llamaba tu escuela primaria?</item>
+        <item>¿En qué ciudad naciste?</item>
+    </string-array>
+    <string-array name="filter_options">
+        <item>Todos</item>
+        <item>Exitosos</item>
+        <item>Fallidos</item>
     </string-array>
 </resources>

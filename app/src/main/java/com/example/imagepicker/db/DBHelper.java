@@ -11,10 +11,8 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.example.imagepicker.Attempt;
 import com.example.imagepicker.User;
@@ -23,7 +21,7 @@ import com.example.imagepicker.face_recognition.FaceClassifier;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "MyFaces.db";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
 
     public static final String FACE_TABLE_NAME = "faces";
     public static final String FACE_COLUMN_ID = "id";
@@ -46,10 +44,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String ATTEMPTS_COLUMN_PERSON_ID = "person_id";
     public static final String ATTEMPTS_COLUMN_PERSON_NAME = "person_name";
     public static final String ATTEMPTS_COLUMN_TIMESTAMP = "timestamp";
-
+    public static final String ATTEMPTS_COLUMN_ID_CARD = "id_card";
+    public static final String ATTEMPTS_COLUMN_INTENT = "intent";
 
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME , null, DATABASE_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
@@ -78,6 +77,8 @@ public class DBHelper extends SQLiteOpenHelper {
                         ATTEMPTS_COLUMN_PERSON_ID + " INTEGER, " +
                         ATTEMPTS_COLUMN_PERSON_NAME + " TEXT, " +
                         ATTEMPTS_COLUMN_TIMESTAMP + " TEXT, " +
+                        ATTEMPTS_COLUMN_ID_CARD + " TEXT, " +
+                        ATTEMPTS_COLUMN_INTENT + " TEXT, " +
                         "FOREIGN KEY(" + ATTEMPTS_COLUMN_PERSON_ID + ") REFERENCES " + FACE_TABLE_NAME + "(" + FACE_COLUMN_ID + "))"
         );
     }
@@ -93,7 +94,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public boolean insertFace(String name, int cif, String major, int semester, Object embedding) {
         float[][] floatList = (float[][]) embedding;
         StringBuilder embeddingString = new StringBuilder();
-        for(Float f: floatList[0]){
+        for (Float f : floatList[0]) {
             embeddingString.append(f.toString()).append(",");
         }
         SQLiteDatabase db = this.getWritableDatabase();
@@ -111,7 +112,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(USERS_COLUMN_USERNAME, username);
-        contentValues.put(USERS_COLUMN_PASSWORD, password); // WARNING: Storing plain text password
+        contentValues.put(USERS_COLUMN_PASSWORD, password);
         contentValues.put(USERS_COLUMN_SECURITY_QUESTION, securityQuestion);
         contentValues.put(USERS_COLUMN_SECURITY_ANSWER, securityAnswer);
         contentValues.put(USERS_COLUMN_ROLE, role);
@@ -119,13 +120,16 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public void insertAttempt(Integer personId, String personName) {
+    public void insertAttempt(Integer personId, String personName, String idCard, String intent) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
 
         if (personId != null) {
             contentValues.put(ATTEMPTS_COLUMN_PERSON_ID, personId);
+        } else {
+            contentValues.put(ATTEMPTS_COLUMN_ID_CARD, idCard);
+            contentValues.put(ATTEMPTS_COLUMN_INTENT, intent);
         }
         contentValues.put(ATTEMPTS_COLUMN_PERSON_NAME, personName);
         contentValues.put(ATTEMPTS_COLUMN_TIMESTAMP, timestamp);
@@ -134,7 +138,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public int checkUser(String username, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from users where username = ? and password = ?", new String[]{username, password});
+        Cursor res = db.rawQuery("select * from users where username = ? and password = ?", new String[]{username, password});
         if (res.getCount() > 0) {
             res.moveToFirst();
             @SuppressLint("Range") int role = res.getInt(res.getColumnIndex(USERS_COLUMN_ROLE));
@@ -147,7 +151,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public boolean checkSecurityAnswer(String username, String securityQuestion, String securityAnswer) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from users where username = ? and security_question = ? and security_answer = ?", new String[]{username, securityQuestion, securityAnswer});
+        Cursor res = db.rawQuery("select * from users where username = ? and security_question = ? and security_answer = ?", new String[]{username, securityQuestion, securityAnswer});
         boolean exists = res.getCount() > 0;
         res.close();
         return exists;
@@ -157,7 +161,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(USERS_COLUMN_PASSWORD, newPassword);
-        db.update(USERS_TABLE_NAME, contentValues, "username = ? ", new String[] { username } );
+        db.update(USERS_TABLE_NAME, contentValues, "username = ? ", new String[]{username});
     }
 
     public void deleteFace(String id) {
@@ -226,7 +230,9 @@ public class DBHelper extends SQLiteOpenHelper {
             Integer personId = res.isNull(res.getColumnIndex(ATTEMPTS_COLUMN_PERSON_ID)) ? null : res.getInt(res.getColumnIndex(ATTEMPTS_COLUMN_PERSON_ID));
             String personName = res.getString(res.getColumnIndex(ATTEMPTS_COLUMN_PERSON_NAME));
             String timestamp = res.getString(res.getColumnIndex(ATTEMPTS_COLUMN_TIMESTAMP));
-            attempts.add(new Attempt(id, personId, personName, timestamp));
+            String idCard = res.getString(res.getColumnIndex(ATTEMPTS_COLUMN_ID_CARD));
+            String intent = res.getString(res.getColumnIndex(ATTEMPTS_COLUMN_INTENT));
+            attempts.add(new Attempt(id, personId, personName, timestamp, idCard, intent));
             res.moveToNext();
         }
         res.close();
@@ -236,11 +242,11 @@ public class DBHelper extends SQLiteOpenHelper {
     @SuppressLint("Range")
     public HashMap<String, FaceClassifier.Recognition> getAllFaces() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from " + FACE_TABLE_NAME, null );
+        Cursor res = db.rawQuery("select * from " + FACE_TABLE_NAME, null);
         res.moveToFirst();
 
         HashMap<String, FaceClassifier.Recognition> registered = new HashMap<>();
-        while(!res.isAfterLast()){
+        while (!res.isAfterLast()) {
             String id = res.getString(res.getColumnIndex(FACE_COLUMN_ID));
             String name = res.getString(res.getColumnIndex(FACE_COLUMN_NAME));
             int cif = res.getInt(res.getColumnIndex(FACE_COLUMN_CIF));
@@ -254,7 +260,7 @@ public class DBHelper extends SQLiteOpenHelper {
             }
             float[][] embeedings = new float[1][stringList.length];
             for (int i = 0; i < stringList.length; i++) {
-                if(!stringList[i].isEmpty()) {
+                if (!stringList[i].isEmpty()) {
                     embeedings[0][i] = Float.parseFloat(stringList[i]);
                 }
             }

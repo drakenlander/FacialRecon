@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> {
 
-    private final ArrayList<FaceClassifier.Recognition> facesList;
+    private ArrayList<FaceClassifier.Recognition> facesList;
     private final int role;
     private final Context context;
 
@@ -41,11 +41,10 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         FaceClassifier.Recognition recognition = facesList.get(position);
-        holder.faceIdText.setText("ID: " + recognition.getId());
-        holder.faceNameText.setText("Name: " + recognition.getTitle());
+        holder.faceNameText.setText(recognition.getTitle());
         holder.faceCifText.setText("CIF: " + recognition.getCif());
-        holder.faceMajorText.setText("Major: " + recognition.getMajor());
-        holder.faceSemesterText.setText("Semester: " + recognition.getSemester());
+        holder.faceMajorText.setText("Carrera: " + recognition.getMajor());
+        holder.faceSemesterText.setText("Semestre: " + recognition.getSemester());
 
         if (role == 2) {
             holder.modifyButton.setVisibility(View.VISIBLE);
@@ -57,6 +56,9 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
 
                 Intent intent = new Intent(context, RegisterActivity.class);
                 intent.putExtra("face_name", recognition.getTitle());
+                intent.putExtra("face_cif", recognition.getCif());
+                intent.putExtra("face_major", recognition.getMajor());
+                intent.putExtra("face_semester", recognition.getSemester());
                 context.startActivity(intent);
 
                 facesList.remove(position);
@@ -91,8 +93,12 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
         return facesList.size();
     }
 
+    public void updateList(ArrayList<FaceClassifier.Recognition> newList) {
+        this.facesList = newList;
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView faceIdText;
         public TextView faceNameText;
         public TextView faceCifText;
         public TextView faceMajorText;
@@ -102,7 +108,6 @@ public class FacesAdapter extends RecyclerView.Adapter<FacesAdapter.ViewHolder> 
 
         public ViewHolder(View view) {
             super(view);
-            faceIdText = view.findViewById(R.id.face_id_text);
             faceNameText = view.findViewById(R.id.face_name_text);
             faceCifText = view.findViewById(R.id.face_cif_text);
             faceMajorText = view.findViewById(R.id.face_major_text);

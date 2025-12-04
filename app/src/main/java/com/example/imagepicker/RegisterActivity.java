@@ -51,6 +51,9 @@ public class RegisterActivity extends AppCompatActivity {
     private FaceDetector detector;
     private FaceClassifier faceClassifier;
     private String faceName;
+    private int faceCif;
+    private String faceMajor;
+    private int faceSemester;
 
     private final ActivityResultLauncher<Intent> galleryActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -90,6 +93,9 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         faceName = getIntent().getStringExtra("face_name");
+        faceCif = getIntent().getIntExtra("face_cif", 0);
+        faceMajor = getIntent().getStringExtra("face_major");
+        faceSemester = getIntent().getIntExtra("face_semester", 0);
 
         imageView = findViewById(R.id.imageView2);
         galleryCard = findViewById(R.id.gallerycard);
@@ -199,6 +205,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         if (faceName != null) {
             nameInput.setText(faceName);
+            cifInput.setText(String.valueOf(faceCif));
+            majorInput.setText(faceMajor);
+            semesterInput.setText(String.valueOf(faceSemester));
         }
 
         register.setOnClickListener(view -> {

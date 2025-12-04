@@ -19,6 +19,7 @@ public class MainMenuActivity extends AppCompatActivity {
     private Button adminButton;
     private Button signUpButton;
     private CardView manageFacesCard;
+    private Button modifyCredentialsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,11 +32,12 @@ public class MainMenuActivity extends AppCompatActivity {
 
         // Set the welcome text
         welcomeText = findViewById(R.id.welcome_text);
-        welcomeText.setText("Hola, " + username + "! (Rol: " + role + ")");
+        welcomeText.setText("Hola, " + username + "!");
 
         adminButton = findViewById(R.id.admin_button);
         signUpButton = findViewById(R.id.sign_up_button);
         manageFacesCard = findViewById(R.id.manage_faces_card);
+        modifyCredentialsButton = findViewById(R.id.modify_credentials_button);
 
         // Set up the UI based on the user's role
         setupUIByRole();
@@ -74,8 +76,7 @@ public class MainMenuActivity extends AppCompatActivity {
             }
         });
 
-        CardView modifyCredentialsCard = findViewById(R.id.modify_credentials_card);
-        modifyCredentialsCard.setOnClickListener(new View.OnClickListener() {
+        modifyCredentialsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, ModifyCredentialsActivity.class);
@@ -122,7 +123,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
         if (requestCode == MODIFY_CREDENTIALS_REQUEST && resultCode == RESULT_OK && data != null) {
             username = data.getStringExtra("username");
-            welcomeText.setText("Hola, " + username + "! (Rol: " + role + ")");
+            welcomeText.setText("Hola, " + username + "!");
         }
     }
 

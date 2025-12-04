@@ -54,6 +54,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (itemId == R.id.nav_sign_in) {
             Intent signInIntent = new Intent(MainActivity.this, SignInActivity.class);
             startActivity(signInIntent);
+        } else if (itemId == R.id.nav_faq) {
+            Intent faqIntent = new Intent(MainActivity.this, InfoActivity.class);
+            faqIntent.putExtra("title", "FAQs");
+            faqIntent.putExtra("file", "faq.html");
+            startActivity(faqIntent);
+        } else if (itemId == R.id.nav_privacy_policy) {
+            Intent privacyIntent = new Intent(MainActivity.this, InfoActivity.class);
+            privacyIntent.putExtra("title", "Política de Privacidad");
+            privacyIntent.putExtra("file", "privacy_policy.html");
+            startActivity(privacyIntent);
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);

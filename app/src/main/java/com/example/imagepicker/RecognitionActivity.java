@@ -2,6 +2,7 @@ package com.example.imagepicker;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -192,7 +194,7 @@ public class RecognitionActivity extends AppCompatActivity {
                 .addOnSuccessListener(faces -> {
                     if (faces.isEmpty()) {
                         imageView.setImageBitmap(input);
-                        Toast.makeText(RecognitionActivity.this, "No face detected.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RecognitionActivity.this, "No se detectó ningún rostro.", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     for (Face face : faces) {
@@ -222,29 +224,40 @@ public class RecognitionActivity extends AppCompatActivity {
         Log.d("tryFR", "Recognition: " + recognition.getTitle() + ", " + recognition.getDistance());
 
         if (recognition != null && !"Unknown".equals(recognition.getTitle()) && recognition.getDistance() < 1) {
-            dbHelper.insertAttempt(Integer.parseInt(recognition.getId()), recognition.getTitle());
+            dbHelper.insertAttempt(Integer.parseInt(recognition.getId()), recognition.getTitle(), null, null);
             Paint p1 = new Paint();
             p1.setColor(Color.WHITE);
             p1.setTextSize(60);
             canvas.drawText(recognition.getTitle() + " (" + recognition.getDistance() + ")", bound.left, bound.top, p1);
-            Toast.makeText(this, "Attempt logged for " + recognition.getTitle(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Intento de acceso registrado para " + recognition.getTitle(), Toast.LENGTH_SHORT).show();
         } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Face Not Recognized");
-            builder.setMessage("Please enter your name to log the attempt:");
-            final EditText input = new EditText(this);
-            builder.setView(input);
-            builder.setPositiveButton("OK", (dialog, which) -> {
-                String name = input.getText().toString();
-                if (!name.isEmpty()) {
-                    dbHelper.insertAttempt(null, name);
-                    Toast.makeText(this, "Attempt logged for " + name, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Name cannot be empty.", Toast.LENGTH_SHORT).show();
-                }
-            });
-            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-            builder.show();
+            showUnrecognizedFaceDialog();
         }
+    }
+
+    private void showUnrecognizedFaceDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.unrecognized_face_dialog);
+
+        EditText nameInput = dialog.findViewById(R.id.unrecognized_name_input);
+        EditText idCardInput = dialog.findViewById(R.id.unrecognized_id_card_input);
+        EditText intentInput = dialog.findViewById(R.id.unrecognized_intent_input);
+        Button logAttemptButton = dialog.findViewById(R.id.log_attempt_button);
+
+        logAttemptButton.setOnClickListener(v -> {
+            String name = nameInput.getText().toString().trim();
+            String idCard = idCardInput.getText().toString().trim();
+            String intent = intentInput.getText().toString().trim();
+
+            if (!name.isEmpty()) {
+                dbHelper.insertAttempt(null, name, idCard, intent);
+                Toast.makeText(this, "Intento de acceso registrado para " + name, Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            } else {
+                nameInput.setError("El nombre no puede estar vacío.");
+            }
+        });
+
+        dialog.show();
     }
 }
